@@ -1,5 +1,13 @@
+from __future__ import annotations
+
 import pytest
-from zero.builtins import NonNegativeInt, Pixels, Resolution
+from zero.builtins import NonNegativeInt
+from zero.builtins import Pixels
+from zero.builtins import Resolution
+
+
+def test():
+    pass
 
 
 def test_positive_int():
@@ -17,4 +25,4 @@ def test_pixel():
 
 
 def test_resolution():
-    r = Resolution(width=640, height=480)
+    Resolution(width=Pixels(640), height=Pixels(640))

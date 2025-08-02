@@ -6,7 +6,7 @@ authors = [
     {name = "suspe",email = "davidp.info1@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
 ]
 
@@ -23,6 +23,7 @@ setuptools = "^80.9.0"
 black = "^25.1.0"
 mypy = "^1.17.1"
 pre-commit = "^4.2.0"
+commitizen = "^4.8.3"
 
 [tool.mypy]
 check_untyped_defs = true
@@ -30,6 +31,15 @@ check_untyped_defs = true
 [[tool.mypy.overrides]]
 module = ["untyped_package.*"]
 follow_untyped_imports = true
+
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "poetry"
+update_changelog_on_bump = true
+major_version_zero = true
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
