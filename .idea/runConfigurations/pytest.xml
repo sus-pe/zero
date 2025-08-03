@@ -17,7 +17,9 @@
     <option name="_new_target" value="&quot;&quot;" />
     <option name="_new_targetType" value="&quot;CUSTOM&quot;" />
     <method v="2">
-      <option name="FwBeforeLaunchTask" enabled="true" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="ruff-format" run_configuration_type="PythonConfigurationType" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="mypy" run_configuration_type="PythonConfigurationType" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="ruff-lint" run_configuration_type="PythonConfigurationType" />
     </method>
   </configuration>
 </component>

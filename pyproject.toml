@@ -16,11 +16,20 @@ packages = [{include = "zero", from = "src"}]
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.4.1"
+pytest-cov = "^6.2.1"
 
+[tool.pytest.ini_options]
+addopts = "--cov src --cov tests --cov-fail-under=100 --cov-report term-missing"
+testpaths = [
+    "tests",
+]
 
-[tool.poetry.group.dev.dependencies]
-black = "^25.1.0"
+[tool.poetry.group.code-style.dependencies]
 mypy = "^1.17.1"
+ruff = "^0.12.7"
+
+
+[tool.poetry.group.git.dependencies]
 pre-commit = "^4.2.0"
 commitizen = "^4.8.3"
 
