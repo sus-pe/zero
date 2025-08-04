@@ -52,3 +52,11 @@ repos:
           - pre-push
     repo: https://github.com/commitizen-tools/commitizen
     rev: v4.8.3
+  - repo: local
+    hooks:
+      - id: test
+        name: Test and Assert Coverage
+        entry: poetry run pytest
+        language: system
+        pass_filenames: false
+        always_run: true
