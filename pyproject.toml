@@ -19,11 +19,15 @@ pytest = "^8.4.1"
 
 
 [tool.poetry.group.dev.dependencies]
-setuptools = "^80.9.0"
 black = "^25.1.0"
 mypy = "^1.17.1"
 pre-commit = "^4.2.0"
 commitizen = "^4.8.3"
+
+
+
+[tool.poetry.group.pycharm.dependencies]
+setuptools = "80.6.0"
 
 [tool.mypy]
 check_untyped_defs = true
