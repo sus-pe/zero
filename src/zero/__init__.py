@@ -1,5 +1,5 @@
-from zero.builtins import Pixels
-from zero.builtins import Resolution
+from zero.core.types import Pixels
+from zero.core.types import Resolution
 from zero.core import Zero
 from zero.pygame import PygamePlatform
 
