@@ -26,9 +26,9 @@ jobs:
       - name: setup poetry
         run: |
           python -m pip install --upgrade pip
-          python -m venv $POETRY_VENV_PATH
-          $POETRY_VENV_PATH/bin/pip install poetry==$POETRY_VERSION
-          echo "$POETRY_VENV_PATH/bin" >> $GITHUB_PATH
+          python -m pip install --user pipx
+          python3 -m pipx ensurepath
+          pipx install poetry==$POETRY_VERSION
           which poetry
       - name: install
         run: |
