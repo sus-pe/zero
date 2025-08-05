@@ -10,7 +10,7 @@ def main():
         height=Pixels(600),
     )
     zero = Zero(platform=PygamePlatform())
-    print(resolution, zero)
+    print(resolution, zero, zero.process_pending_commands())
 
 
 if __name__ == "__main__":  # pragma: no cover
