@@ -28,12 +28,13 @@ jobs:
           python -m pip install --upgrade pip
           python -m venv $POETRY_VENV_PATH
           $POETRY_VENV_PATH/bin/pip install poetry==$POETRY_VERSION
+          "$POETRY_VENV_PATH/bin" >> $GITHUB_PATH
       - name: install
         run: |
-          $POETRY install
+          poetry install
       - name: build
         run: |
-          $POETRY build
+          poetry build
       - name: pre-commit
         run: |
           poetry run pre-commit run --all-files
