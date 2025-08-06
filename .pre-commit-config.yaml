@@ -9,8 +9,17 @@ repos:
       - id: debug-statements
       - id: name-tests-test
       - id: requirements-txt-fixer
+      - id: check-merge-conflict
     repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
+  - repo: https://github.com/astral-sh/uv-pre-commit
+    rev: 0.8.4
+    hooks:
+      - id: uv-lock
+  - repo: https://github.com/abravalheri/validate-pyproject
+    rev: v0.24.1
+    hooks:
+      - id: validate-pyproject
   - hooks:
       - id: pyupgrade
     repo: https://github.com/asottile/pyupgrade
@@ -31,20 +40,14 @@ repos:
       - id: setup-cfg-fmt
     repo: https://github.com/asottile/setup-cfg-fmt
     rev: v2.8.0
-  - hooks:
-      - id: mypy
-    repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.17.1
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    # Ruff version.
-
     rev: v0.12.7
     hooks:
-      # Run the linter.
-      - id: ruff-check
-        args: [--fix]
       - id: ruff-format
-        # Run the formatter.
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        types_or: [python, pyi]
+        require_serial: true
   - hooks:
       - id: commitizen
       - id: commitizen-branch
@@ -52,11 +55,43 @@ repos:
           - pre-push
     repo: https://github.com/commitizen-tools/commitizen
     rev: v4.8.3
+  - repo: https://github.com/rhysd/actionlint
+    # `actionlint` hook, for verifying correct syntax in GitHub Actions workflows.
+
+    # Some additional configuration for `actionlint` can be found in `.github/actionlint.yaml`.
+    rev: v1.7.7
+    hooks:
+      - id: actionlint
+        stages:
+          # This hook is disabled by default, since it's quite slow.
+          # To run all hooks *including* this hook, use `uvx pre-commit run -a --hook-stage=manual`.
+          # To run *just* this hook, use `uvx pre-commit run -a actionlint --hook-stage=manual`.
+          - manual
+        args:
+          - "-ignore=SC2129" # ignorable stylistic lint from shellcheck
+          - "-ignore=SC2016" # another shellcheck lint: seems to have false positives?
+        additional_dependencies:
+          # actionlint has a shellcheck integration which extracts shell scripts in `run:` steps from GitHub Actions
+          # and checks these with shellcheck. This is arguably its most useful feature,
+          # but the integration only works if shellcheck is installed
+          - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0"
   - repo: local
     hooks:
       - id: test
         name: Test and Assert Coverage
-        entry: poetry run pytest
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: type-check-mypy
+        name: mypy
+        entry: uv run mypy .
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: type-check-ty
+        name: ty
+        entry: uv run ty check
         language: system
         pass_filenames: false
         always_run: true

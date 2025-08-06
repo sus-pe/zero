@@ -21,6 +21,9 @@ git = [
     "commitizen>=4.8.3,<5",
 ]
 pycharm = ["setuptools==80.6.0"]
+dev = [
+    "ty>=0.0.1a16",
+]
 
 [tool.uv]
 default-groups = [
