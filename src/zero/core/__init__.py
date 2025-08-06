@@ -2,7 +2,7 @@ from abc import ABC
 from collections.abc import Sequence
 from typing import TypeAlias
 
-from zero.core.types import Loops
+from zero.core.types import PositiveInt
 
 
 class Command(ABC):
@@ -50,8 +50,10 @@ class Zero:
         self.loop_counter += 1
         self.process_pending_commands()
 
-    def loop_for(self, loops: Loops):
-        for i in range(loops.value):
+    def loop_for(self, loops: PositiveInt):
+        assert loops > 0
+
+        for i in range(loops):
             self.loop()
 
     def loop_until_exit_command(self):

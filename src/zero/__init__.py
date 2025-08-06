@@ -1,4 +1,4 @@
-from zero.core.types import Pixels, Loops
+from zero.core.types import Pixels
 from zero.core.types import Resolution
 from zero.core import Zero
 from zero.pygame import PygamePlatform
@@ -11,7 +11,7 @@ def main():
     )
     platform = PygamePlatform()
     zero = Zero(platform=platform)
-    zero.loop_for(Loops(value=3))
+    zero.loop_for(3)
     platform.queue_exit_command()
     zero.loop_until_exit_command()
     print(resolution)

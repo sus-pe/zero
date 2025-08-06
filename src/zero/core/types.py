@@ -1,18 +1,13 @@
 from dataclasses import dataclass
+from typing import TypeAlias
 
-from pydantic import NonNegativeInt, BaseModel
-
-
-class NonNegativeType(BaseModel):
-    value: NonNegativeInt
+PositiveInt: TypeAlias = int
 
 
-class Loops(NonNegativeType):
-    pass
-
-
-class Pixels(NonNegativeType):
-    pass
+class Pixels:
+    def __init__(self, value: PositiveInt):
+        assert value > 0
+        self._value = value
 
 
 @dataclass(frozen=True)

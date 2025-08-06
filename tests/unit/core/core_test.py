@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from tests.utils import DummyPlatform, MockPlatform
 from zero import Zero
-from pytest import fixture
-
-from zero.core import Loops
+from pytest import fixture, raises
 
 
 @fixture
@@ -35,9 +33,17 @@ def test_zero_loop(zero: Zero):
     assert zero.loop_counter == 1
 
 
+def test_zero_loop_for_errors(zero: Zero):
+    with raises(AssertionError):
+        zero.loop_for(-3)
+
+    with raises(AssertionError):
+        zero.loop_for(0)
+
+
 def test_zero_loop_for(zero: Zero):
     loops = 20
-    zero.loop_for(Loops(value=loops))
+    zero.loop_for(loops)
     assert zero.loop_counter == loops
 
 
