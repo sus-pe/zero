@@ -22,6 +22,8 @@ git = [
 ]
 pycharm = ["setuptools==80.6.0"]
 dev = [
+    "annotated-types>=0.7.0",
+    "pydantic>=2.11.7",
     "ty>=0.0.1a16",
 ]
 
