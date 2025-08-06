@@ -27,4 +27,4 @@ jobs:
         run: uv sync --locked --all-extras --dev
       - name: pre-commit
         run: |
-          uv run pre-commit run --all-files
+          SKIP=no-commit-to-branch uv run pre-commit run --all-files
