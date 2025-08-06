@@ -2,41 +2,55 @@
 name = "zero"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "suspe",email = "davidp.info1@gmail.com"}
-]
-readme = "README.md"
+authors = [{ name = "suspe", email = "davidp.info1@gmail.com" }]
 requires-python = ">=3.12,<4.0"
-dependencies = [
+readme = "README.md"
+dependencies = []
+
+[dependency-groups]
+test = [
+    "pytest>=8.4.1,<9",
+    "pytest-cov>=6.2.1,<7",
+]
+code-style = [
+    "mypy>=1.17.1,<2",
+    "ruff>=0.12.7,<0.13",
+]
+git = [
+    "pre-commit>=4.2.0,<5",
+    "commitizen>=4.8.3,<5",
+]
+pycharm = ["setuptools==80.6.0"]
+dev = [
+    "ty>=0.0.1a16",
 ]
 
-[tool.poetry]
-packages = [{include = "zero", from = "src"}]
+[tool.uv]
+default-groups = [
+    "test",
+    "code-style",
+    "git",
+    "pycharm",
+]
 
+[tool.hatch.build.targets.sdist]
+include = ["src/zero"]
 
-[tool.poetry.group.test.dependencies]
-pytest = "^8.4.1"
-pytest-cov = "^6.2.1"
+[tool.hatch.build.targets.wheel]
+include = ["src/zero"]
+
+[tool.hatch.build.targets.wheel.sources]
+"src/zero" = "zero"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 addopts = "--cov src --cov tests --cov-fail-under=100 --cov-report term-missing"
 testpaths = [
     "tests",
 ]
-
-[tool.poetry.group.code-style.dependencies]
-mypy = "^1.17.1"
-ruff = "^0.12.7"
-
-
-[tool.poetry.group.git.dependencies]
-pre-commit = "^4.2.0"
-commitizen = "^4.8.3"
-
-
-
-[tool.poetry.group.pycharm.dependencies]
-setuptools = "80.6.0"
 
 [tool.mypy]
 check_untyped_defs = true
@@ -45,7 +59,6 @@ check_untyped_defs = true
 module = ["untyped_package.*"]
 follow_untyped_imports = true
 
-
 [tool.commitizen]
 name = "cz_conventional_commits"
 tag_format = "$version"
@@ -53,7 +66,3 @@ version_scheme = "pep440"
 version_provider = "poetry"
 update_changelog_on_bump = true
 major_version_zero = true
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
