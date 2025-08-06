@@ -1,36 +1,61 @@
 from __future__ import annotations
 
-from typing import Collection
-
-
+from tests.utils import DummyPlatform, MockPlatform
 from zero import Zero
-from zero.core import Platform, NullCommand, Command
+from pytest import fixture, raises
 
 
-class DummyPlatform(Platform):
-    def get_pending_commands(self) -> Collection:
-        return []
-
-
-class MockPlatform(DummyPlatform):
-    def __init__(self, pending_commands: Collection[Command]) -> None:
-        self._pending_commands = pending_commands
-
-    def get_pending_commands(self) -> Collection:
-        return self._pending_commands
+@fixture
+def zero(mock_platform: MockPlatform) -> Zero:
+    return Zero(platform=mock_platform)
 
 
 def test_zero():
     Zero(platform=DummyPlatform()).process_pending_commands()
 
 
-def test_mock_platform():
-    expected_pending_commands = [NullCommand()]
-    mock_platform = MockPlatform(pending_commands=expected_pending_commands)
-    pending_commands = mock_platform.get_pending_commands()
-    assert pending_commands is expected_pending_commands
+def test_zero_process_command(zero: Zero):
+    zero.process_pending_commands()
 
 
-def test_zero_process_command():
-    z = Zero(platform=MockPlatform(pending_commands=[]))
-    z.process_pending_commands()
+def test_zero_exit_command(zero: Zero, mock_platform: MockPlatform):
+    assert not zero.is_exit_command
+    zero.process_pending_commands()
+    assert not zero.is_exit_command
+    mock_platform.queue_exit_command()
+    zero.process_pending_commands()
+    assert zero.is_exit_command
+
+
+def test_zero_loop(zero: Zero):
+    assert zero.loop_counter == 0
+    zero.loop()
+    assert zero.loop_counter == 1
+
+
+def test_zero_loop_for_errors(zero: Zero):
+    with raises(AssertionError):
+        zero.loop_for(-3)
+
+    with raises(AssertionError):
+        zero.loop_for(0)
+
+
+def test_zero_loop_for(zero: Zero):
+    loops = 20
+    zero.loop_for(loops)
+    assert zero.loop_counter == loops
+
+
+def test_zero_loop_process_exit_command(zero: Zero, mock_platform: MockPlatform):
+    mock_platform.queue_exit_command()
+    assert not zero.is_exit_command
+    zero.loop()
+    assert zero.is_exit_command
+
+
+def test_zero_loop_until_exit_command(zero: Zero, mock_platform: MockPlatform):
+    mock_platform.queue_exit_command()
+    assert not zero.is_exit_command
+    zero.loop_until_exit_command()
+    assert zero.is_exit_command
