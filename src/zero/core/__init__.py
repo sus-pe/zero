@@ -20,7 +20,7 @@ class Platform(ABC):
     def __init__(self) -> None:
         self._pending_commands: list[Command] = []
 
-    def queue_exit_command(self):
+    def queue_exit_command(self) -> None:
         self._pending_commands.append(ExitCommand())
 
     def get_pending_commands(self) -> CommandQueue:
@@ -34,28 +34,28 @@ class Platform(ABC):
 
 
 class Zero:
-    def __init__(self, platform: Platform):
+    def __init__(self, platform: Platform) -> None:
         self.loop_counter = 0
         self.is_exit_command = False
         assert isinstance(platform, Platform)
         self._platform = platform
 
-    def process_pending_commands(self):
+    def process_pending_commands(self) -> None:
         for command in self._platform.get_pending_commands():
             match command:
                 case ExitCommand():
                     self.is_exit_command = True
 
-    def loop(self):
+    def loop(self) -> None:
         self.loop_counter += 1
         self.process_pending_commands()
 
-    def loop_for(self, loops: PositiveInt):
+    def loop_for(self, loops: PositiveInt) -> None:
         assert loops > 0
 
         for i in range(loops):
             self.loop()
 
-    def loop_until_exit_command(self):
+    def loop_until_exit_command(self) -> None:
         while not self.is_exit_command:
             self.loop()

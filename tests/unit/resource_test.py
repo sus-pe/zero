@@ -1,7 +1,4 @@
-from __future__ import annotations
-
-
-def test_resource():
+def test_resource() -> None:
     from importlib.resources import files
 
     resource_dir = files("zero.resources")
