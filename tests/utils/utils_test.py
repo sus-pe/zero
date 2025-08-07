@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from tests.utils import MockPlatform
 from zero.core import ExitCommand
 

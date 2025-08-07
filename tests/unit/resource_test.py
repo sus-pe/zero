@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 def test_resource():
     from importlib.resources import files
 

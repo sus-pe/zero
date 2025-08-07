@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from _pytest.fixtures import fixture
+from pytest import fixture
 
 from tests.utils import MockPlatform
 

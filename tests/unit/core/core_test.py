@@ -1,8 +1,7 @@
-from __future__ import annotations
-
 from tests.utils import DummyPlatform, MockPlatform
-from zero import Zero
 from pytest import fixture, raises
+
+from zero.core import Zero
 
 
 @fixture
