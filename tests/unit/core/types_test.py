@@ -1,20 +1,23 @@
-from zero.core.types import Pixels, DisplayResolution
-from zero.core.types import Resolution
 from pytest import raises
 
+from zero.core.types import DisplayResolution, Pixels, Resolution
 
-def test_pixel():
+
+def test_pixel() -> None:
     pixels = Pixels(640)
 
     with raises(ValueError):
         Pixels(-640)
+
+    with raises(ValueError):
+        Pixels(0)
 
     assert int(pixels) == 640
 
     assert Pixels(1920) / Pixels(1080) == 1920 / 1080
 
 
-def test_resolution():
+def test_resolution() -> None:
     r = Resolution(width=Pixels(640), height=Pixels(640))
     assert r[0] == 640
     assert r[1] == 640
@@ -26,7 +29,7 @@ def test_resolution():
     assert r.aspect_ratio == r.width / r.height
 
 
-def test_default_resolutions():
+def test_default_resolutions() -> None:
     for r in DisplayResolution:
         width, height = r
         assert width == r.value.width

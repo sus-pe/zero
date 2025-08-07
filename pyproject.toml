@@ -57,10 +57,21 @@ testpaths = [
 
 [tool.mypy]
 check_untyped_defs = true
+disallow_untyped_defs = true
 
 [[tool.mypy.overrides]]
 module = ["untyped_package.*"]
 follow_untyped_imports = true
+
+[tool.ruff]
+# Enable both linting and formatting
+lint.select = ["F", "I"]
+lint.fixable = ["F", "I"]
+lint.ignore = []
+# Enable removal of unused imports (F401 = unused import)
+extend-select = ["F401"]
+# Auto-fix everything fixable
+fix = true
 
 [tool.commitizen]
 name = "cz_conventional_commits"

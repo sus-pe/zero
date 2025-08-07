@@ -1,26 +1,12 @@
 import sys
 from typing import Any, Generator
 from unittest.mock import MagicMock
-from importlib import reload
-from pytest import fixture, FixtureRequest
+
+from pytest import FixtureRequest, fixture
 
 import zero
 import zero.pygame
-
-
-def reload_modules(prefix: str):
-    """
-    Reload all modules that start with the given prefix (e.g. 'zero.').
-    This is safer than trying to reload all modules in sys.modules.
-    """
-    reloaded = []
-    for name in list(sys.modules.keys()):
-        if name == prefix or name.startswith(prefix + "."):
-            mod = sys.modules.get(name)
-            if mod is not None:
-                reload(mod)
-                reloaded.append(name)
-    return reloaded
+from tests.utils import reload_modules
 
 
 @fixture

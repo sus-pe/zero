@@ -1,6 +1,10 @@
+from types import TracebackType
+from typing import Optional, Type
+
+import pygame
+
 from zero.core import Platform, Zero
 from zero.core.types import DisplayResolution
-import pygame
 
 
 class PygamePlatform(Platform):
@@ -8,11 +12,17 @@ class PygamePlatform(Platform):
         pygame.init()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
         pygame.quit()
+        return None
 
 
-def main():
+def main() -> None:
     with PygamePlatform() as platform:
         zero = Zero(platform=platform)
         zero.loop_for(3)

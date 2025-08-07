@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from enum import Enum
 from fractions import Fraction
@@ -11,11 +12,11 @@ AspectRatio: TypeAlias = Fraction
 class Pixels:
     value: PositiveInt
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.value <= 0:
             raise ValueError("Pixels must be positive")
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.value
 
     def __truediv__(self, other: "Pixels") -> float:
@@ -28,7 +29,7 @@ class Resolution:
     height: Pixels
     aspect_ratio: AspectRatio = field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         object.__setattr__(
             self, "aspect_ratio", Fraction(self.width.value, self.height.value)
         )
@@ -64,9 +65,9 @@ class DisplayResolution(Enum):
     def aspect_ratio(self) -> AspectRatio:
         return self.value.aspect_ratio
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Pixels]:
         yield self.value.width
         yield self.value.height
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.name} {self.width}x{self.height}"
