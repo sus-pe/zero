@@ -2,10 +2,9 @@ from collections.abc import Iterator
 from dataclasses import dataclass, field
 from enum import Enum
 from fractions import Fraction
-from typing import TypeAlias
 
-PositiveInt: TypeAlias = int
-AspectRatio: TypeAlias = Fraction
+type PositiveInt = int
+type AspectRatio = Fraction
 
 
 @dataclass(frozen=True)
@@ -14,7 +13,8 @@ class Pixels:
 
     def __post_init__(self) -> None:
         if self.value <= 0:
-            raise ValueError("Pixels must be positive")
+            msg = "Pixels must be positive"
+            raise ValueError(msg)
 
     def __int__(self) -> int:
         return self.value
@@ -31,15 +31,18 @@ class Resolution:
 
     def __post_init__(self) -> None:
         object.__setattr__(
-            self, "aspect_ratio", Fraction(self.width.value, self.height.value)
+            self,
+            "aspect_ratio",
+            Fraction(self.width.value, self.height.value),
         )
 
     def __getitem__(self, index: int) -> int:
         if index == 0:
             return int(self.width)
-        elif index == 1:
+        if index == 1:
             return int(self.height)
-        raise IndexError("Resolution only has two dimensions")
+        msg = "Resolution only has two dimensions"
+        raise IndexError(msg)
 
     def __len__(self) -> int:
         return 2

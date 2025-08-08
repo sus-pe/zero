@@ -1,9 +1,9 @@
+import logging
 from types import TracebackType
-from typing import Optional, Type
 
 import pygame
 
-from zero.core import Platform, Zero
+from zero.core import DisplaySettings, Platform, Zero
 from zero.core.types import DisplayResolution
 
 
@@ -14,24 +14,28 @@ class PygamePlatform(Platform):
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]:
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool | None:
         pygame.quit()
         return None
 
 
-def main(platform: PygamePlatform = PygamePlatform()) -> None:
-    with platform as io:
-        zero = Zero(platform=io)
+def main() -> None:
+    logger = logging.getLogger()
+    with PygamePlatform() as io:
+        io.set_display_settings(DisplaySettings(DisplayResolution.SD_4_3.value))
+        zero = Zero(platform=io, display_resolution=DisplayResolution.FHD_1080P.value)
+        zero.display_init()
+        logger.info(io.get_display_settings())
         zero.loop_for(3)
         io.queue_exit_command()
         zero.loop_until_exit_command()
 
-        print(DisplayResolution.SD_4_3)
-        print(DisplayResolution.FHD_1080P)
-        print(DisplayResolution.HD_720P)
-        print(DisplayResolution.QHD_1440P)
-        print(DisplayResolution.UHD_4K)
-        print(DisplayResolution.UWQHD_21_9)
+        logger.info(DisplayResolution.SD_4_3)
+        logger.info(DisplayResolution.FHD_1080P)
+        logger.info(DisplayResolution.HD_720P)
+        logger.info(DisplayResolution.QHD_1440P)
+        logger.info(DisplayResolution.UHD_4K)
+        logger.info(DisplayResolution.UWQHD_21_9)

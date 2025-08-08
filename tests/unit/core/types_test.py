@@ -4,28 +4,32 @@ from zero.core.types import DisplayResolution, Pixels, Resolution
 
 
 def test_pixel() -> None:
-    pixels = Pixels(640)
+    v = 640
+    pixels = Pixels(v)
+    assert int(pixels) == v
 
+    bad_pixels = -640
     with raises(ValueError):
-        Pixels(-640)
+        Pixels(bad_pixels)
 
     with raises(ValueError):
         Pixels(0)
-
-    assert int(pixels) == 640
 
     assert Pixels(1920) / Pixels(1080) == 1920 / 1080
 
 
 def test_resolution() -> None:
-    r = Resolution(width=Pixels(640), height=Pixels(640))
-    assert r[0] == 640
-    assert r[1] == 640
+    expected_width = 640
+    expected_height = 640
+    r = Resolution(width=Pixels(expected_width), height=Pixels(expected_height))
+    assert r[0] == expected_width
+    assert r[1] == expected_height
 
     with raises(IndexError):
         r[2]
 
-    assert len(r) == 2
+    expected_length = 2
+    assert len(r) == expected_length
     assert r.aspect_ratio == r.width / r.height
 
 

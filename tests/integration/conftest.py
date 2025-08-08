@@ -1,8 +1,9 @@
 import sys
-from typing import Any, Generator
+from collections.abc import Generator
+from typing import Any
 from unittest.mock import MagicMock
 
-from pytest import FixtureRequest, fixture
+from pytest import fixture
 
 import zero
 import zero.pygame
@@ -10,14 +11,11 @@ from tests.utils import reload_modules
 
 
 class MockPygame(MagicMock):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        # Nice-to-have name for clearer tracebacks
-        kwargs.setdefault("name", "pygame")
-        super().__init__(*args, **kwargs)
+    pass
 
 
 @fixture
-def mock_pygame(request: FixtureRequest) -> Generator[MockPygame, Any, None]:
+def mock_pygame() -> Generator[MockPygame, Any, None]:
     mock_pygame = MockPygame()
     cached_pygame = sys.modules["pygame"]
     try:

@@ -1,6 +1,7 @@
-def test_resource() -> None:
-    from importlib.resources import files
+from importlib.resources import files
 
+
+def test_resource() -> None:
     resource_dir = files("zero.resources")
     assert resource_dir.is_dir()
 

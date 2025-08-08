@@ -15,6 +15,7 @@ class MockPlatform(DummyPlatform):
 def reload_modules(prefix: str) -> list[str]:
     """
     Reload all modules that start with the given prefix (e.g. 'zero.').
+
     This is safer than trying to reload all modules in sys.modules.
     """
     reloaded = []

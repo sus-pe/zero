@@ -1,9 +1,9 @@
 import random
 import string
 import sys
+from collections.abc import Generator
 from dataclasses import dataclass
 from types import ModuleType
-from typing import Generator, Set
 from unittest.mock import MagicMock
 
 from pytest import MonkeyPatch, fixture
@@ -22,12 +22,12 @@ class MockReload(MagicMock):
         return {call.args[0].__name__ for call in self.call_args_list}
 
 
-def register_fake_modules(module_names: Set[str]) -> None:
+def register_fake_modules(module_names: set[str]) -> None:
     for name in module_names:
         sys.modules[name] = ModuleType(name)
 
 
-@fixture(scope="session")
+@fixture(scope="session", autouse=True)
 def fixed_random_seed() -> int:
     seed = 42
     random.seed(seed)
@@ -40,15 +40,15 @@ def package_suffix_length() -> int:
 
 
 @fixture
-def fake_package_prefix(fixed_random_seed: int, package_suffix_length: int) -> str:
+def fake_package_prefix(package_suffix_length: int) -> str:
     suffix = "".join(
-        random.choices(string.ascii_lowercase + string.digits, k=package_suffix_length)
+        random.choices(string.ascii_lowercase + string.digits, k=package_suffix_length),
     )
     return f"pkg_{suffix}"
 
 
 @fixture
-def fake_package_names(fake_package_prefix: str) -> Set[str]:
+def fake_package_names(fake_package_prefix: str) -> set[str]:
     return {
         f"{fake_package_prefix}",
         f"{fake_package_prefix}.utils",
@@ -57,14 +57,13 @@ def fake_package_names(fake_package_prefix: str) -> Set[str]:
 
 
 def create_fake_module(name: str) -> ModuleType:
-    mod = ModuleType(name)
-    return mod
+    return ModuleType(name)
 
 
 @dataclass(frozen=True)
 class FakeModules:
     prefix: str
-    module_names: Set[str]
+    module_names: set[str]
 
 
 @fixture
@@ -89,7 +88,9 @@ def fake_modules(
 def mock_reload(monkeypatch: MonkeyPatch) -> MockReload:
     mock = MockReload()
     monkeypatch.setitem(
-        sys.modules, "importlib", sys.modules.get("importlib")
+        sys.modules,
+        "importlib",
+        sys.modules.get("importlib"),
     )  # ensure it exists
     monkeypatch.setattr("tests.utils.reload", mock)
     return mock
