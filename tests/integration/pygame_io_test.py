@@ -1,10 +1,10 @@
 from unittest.mock import MagicMock
 
-from zero.pygame import PygamePlatform
+from zero.pygame import PygameIO
 
 
 def test_pygame(mock_pygame: MagicMock) -> None:
-    with PygamePlatform() as platform:
+    with PygameIO() as platform:
         assert platform
         mock_pygame.init.assert_called_once()
     mock_pygame.quit.assert_called_once()

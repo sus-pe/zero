@@ -3,12 +3,12 @@ from types import TracebackType
 
 import pygame
 
-from zero.core import DisplaySettings, Platform, Zero
+from zero.core import IO, DisplaySettings, GameLoop
 from zero.core.types import DisplayResolution
 
 
-class PygamePlatform(Platform):
-    def __enter__(self) -> Platform:
+class PygameIO(IO):
+    def __enter__(self) -> IO:
         pygame.init()
         return self
 
@@ -24,12 +24,10 @@ class PygamePlatform(Platform):
 
 def main() -> None:
     logger = logging.getLogger()
-    with PygamePlatform() as io:
+    with PygameIO() as io:
         io.set_display_settings(DisplaySettings(DisplayResolution.SD_4_3.value))
-        zero = Zero(platform=io, display_resolution=DisplayResolution.FHD_1080P.value)
-        zero.display_init()
+        zero = GameLoop(io=io)
         logger.info(io.get_display_settings())
-        zero.loop_for(3)
         io.queue_exit_command()
         zero.loop_until_exit_command()
 

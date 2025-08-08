@@ -2,7 +2,7 @@ from abc import ABC
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from zero.core.types import PositiveInt, Resolution
+from zero.core.types import Resolution
 
 
 class Command(ABC):
@@ -21,10 +21,10 @@ class DisplaySettings:
     resolution: Resolution
 
 
-class Platform(ABC):
+class IO:
     def __init__(self) -> None:
         self._pending_commands: list[Command] = []
-        self.display: DisplaySettings | None = None
+        self._display_settings: DisplaySettings | None = None
 
     def queue_exit_command(self) -> None:
         self._pending_commands.append(ExitCommand())
@@ -39,26 +39,23 @@ class Platform(ABC):
         return res
 
     def get_display_settings(self) -> DisplaySettings | None:
-        return self.display
+        return self._display_settings
 
     def set_display_settings(self, display: DisplaySettings) -> None:
-        self.display = display
+        self._display_settings = display
 
 
-class Zero:
+class GameLoop:
     def __init__(
         self,
-        platform: Platform,
-        display_resolution: Resolution,
+        io: IO,
     ) -> None:
-        self.display_resolution = display_resolution
         self.loop_counter = 0
         self.is_exit_command = False
-        assert isinstance(platform, Platform)
-        self._platform = platform
+        self._io = io
 
     def process_pending_commands(self) -> None:
-        for command in self._platform.get_pending_commands():
+        for command in self._io.get_pending_commands():
             match command:
                 case ExitCommand():
                     self.is_exit_command = True
@@ -67,15 +64,6 @@ class Zero:
         self.loop_counter += 1
         self.process_pending_commands()
 
-    def loop_for(self, loops: PositiveInt) -> None:
-        assert loops > 0
-
-        for _i in range(loops):
-            self.loop()
-
     def loop_until_exit_command(self) -> None:
         while not self.is_exit_command:
             self.loop()
-
-    def display_init(self) -> None:
-        self._platform.set_display_settings(DisplaySettings(self.display_resolution))

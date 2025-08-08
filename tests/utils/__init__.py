@@ -1,16 +1,6 @@
 import sys
 from importlib import reload
 
-from zero.core import Platform
-
-
-class DummyPlatform(Platform):
-    pass
-
-
-class MockPlatform(DummyPlatform):
-    pass
-
 
 def reload_modules(prefix: str) -> list[str]:
     """

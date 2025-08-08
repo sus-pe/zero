@@ -8,12 +8,12 @@ from unittest.mock import MagicMock
 
 from pytest import MonkeyPatch, fixture
 
-from tests.utils import MockPlatform
+from zero.core import IO
 
 
 @fixture
-def mock_platform() -> MockPlatform:
-    return MockPlatform()
+def io() -> IO:
+    return IO()
 
 
 class MockReload(MagicMock):
