@@ -26,6 +26,10 @@ class IO:
         self._pending_commands: list[Command] = []
         self._display_settings = display_settings
 
+    @property
+    def display_settings(self) -> DisplaySettings:
+        return self._display_settings
+
     def queue_exit_command(self) -> None:
         self._pending_commands.append(ExitCommand())
 
