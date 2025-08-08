@@ -19,9 +19,9 @@ def test_pixel() -> None:
 
 
 def test_resolution() -> None:
-    expected_width = 640
-    expected_height = 640
-    r = Resolution(width=Pixels(expected_width), height=Pixels(expected_height))
+    expected_width = Pixels(640)
+    expected_height = Pixels(640)
+    r = Resolution(width=expected_width, height=expected_height)
     assert r[0] == expected_width
     assert r[1] == expected_height
 
@@ -35,10 +35,7 @@ def test_resolution() -> None:
 
 def test_default_resolutions() -> None:
     for r in DisplayResolution:
-        width, height = r
-        assert width == r.value.width
-        assert height == r.value.height
-        assert width == r.width
-        assert height == r.height
-        assert r.aspect_ratio == r.value.aspect_ratio
         assert repr(r)
+        assert len(r) == len(r.value)
+        assert r[0] == float(r.width)
+        assert r[1] == float(r.height)

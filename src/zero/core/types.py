@@ -1,4 +1,3 @@
-from collections.abc import Iterator
 from dataclasses import dataclass, field
 from enum import Enum
 from fractions import Fraction
@@ -19,6 +18,9 @@ class Pixels:
     def __int__(self) -> int:
         return self.value
 
+    def __float__(self) -> float:
+        return float(self.value)
+
     def __truediv__(self, other: "Pixels") -> float:
         return int(self) / int(other)
 
@@ -36,11 +38,11 @@ class Resolution:
             Fraction(self.width.value, self.height.value),
         )
 
-    def __getitem__(self, index: int) -> int:
+    def __getitem__(self, index: int) -> Pixels:
         if index == 0:
-            return int(self.width)
+            return self.width
         if index == 1:
-            return int(self.height)
+            return self.height
         msg = "Resolution only has two dimensions"
         raise IndexError(msg)
 
@@ -68,9 +70,11 @@ class DisplayResolution(Enum):
     def aspect_ratio(self) -> AspectRatio:
         return self.value.aspect_ratio
 
-    def __iter__(self) -> Iterator[Pixels]:
-        yield self.value.width
-        yield self.value.height
+    def __len__(self) -> int:
+        return len(self.value)
+
+    def __getitem__(self, index: int) -> float:
+        return float(self.value[index])
 
     def __repr__(self) -> str:
-        return f"{self.name} {self.width}x{self.height}"
+        return f"{self.name} {self.width}x{self.height} ({self.aspect_ratio})"

@@ -2,7 +2,7 @@ from abc import ABC
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from zero.core.types import Resolution
+from zero.core.types import DisplayResolution
 
 
 class Command(ABC):
@@ -18,7 +18,7 @@ type CommandQueue = Sequence[Command]
 
 @dataclass(frozen=True)
 class DisplaySettings:
-    resolution: Resolution
+    resolution: DisplayResolution
 
 
 class IO:

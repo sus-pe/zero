@@ -25,7 +25,7 @@ class PygameIO(IO):
 
 def main() -> None:
     logger = logging.getLogger()
-    default_display_settings = DisplaySettings(DisplayResolution.SD_4_3.value)
+    default_display_settings = DisplaySettings(DisplayResolution.SD_4_3)
 
     with PygameIO(default_display_settings) as io:
         zero = GameLoop(io=io)

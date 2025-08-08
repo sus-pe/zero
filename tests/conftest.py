@@ -19,7 +19,7 @@ def display_resolution() -> DisplayResolution:
 
 @fixture
 def display_settings(display_resolution: DisplayResolution) -> DisplaySettings:
-    return DisplaySettings(display_resolution.value)
+    return DisplaySettings(display_resolution)
 
 
 @fixture
