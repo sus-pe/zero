@@ -9,9 +9,16 @@ import zero.pygame
 from tests.utils import reload_modules
 
 
+class MockPygame(MagicMock):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        # Nice-to-have name for clearer tracebacks
+        kwargs.setdefault("name", "pygame")
+        super().__init__(*args, **kwargs)
+
+
 @fixture
-def mock_pygame(request: FixtureRequest) -> Generator[MagicMock, Any, None]:
-    mock_pygame = MagicMock()
+def mock_pygame(request: FixtureRequest) -> Generator[MockPygame, Any, None]:
+    mock_pygame = MockPygame()
     cached_pygame = sys.modules["pygame"]
     try:
         sys.modules["pygame"] = mock_pygame

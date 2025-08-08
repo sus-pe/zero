@@ -22,11 +22,11 @@ class PygamePlatform(Platform):
         return None
 
 
-def main() -> None:
-    with PygamePlatform() as platform:
-        zero = Zero(platform=platform)
+def main(platform: PygamePlatform = PygamePlatform()) -> None:
+    with platform as io:
+        zero = Zero(platform=io)
         zero.loop_for(3)
-        platform.queue_exit_command()
+        io.queue_exit_command()
         zero.loop_until_exit_command()
 
         print(DisplayResolution.SD_4_3)
