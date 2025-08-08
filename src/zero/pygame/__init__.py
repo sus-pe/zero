@@ -10,6 +10,7 @@ from zero.core.types import DisplayResolution
 class PygameIO(IO):
     def __enter__(self) -> IO:
         pygame.init()
+        pygame.display.set_mode(self._display_settings.resolution)
         return self
 
     def __exit__(
@@ -24,10 +25,10 @@ class PygameIO(IO):
 
 def main() -> None:
     logger = logging.getLogger()
-    with PygameIO() as io:
-        io.set_display_settings(DisplaySettings(DisplayResolution.SD_4_3.value))
+    with PygameIO(DisplaySettings(DisplayResolution.SD_4_3.value)) as io:
         zero = GameLoop(io=io)
         logger.info(io.get_display_settings())
+
         io.queue_exit_command()
         zero.loop_until_exit_command()
 

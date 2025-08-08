@@ -22,9 +22,9 @@ class DisplaySettings:
 
 
 class IO:
-    def __init__(self) -> None:
+    def __init__(self, display_settings: DisplaySettings) -> None:
         self._pending_commands: list[Command] = []
-        self._display_settings: DisplaySettings | None = None
+        self._display_settings = display_settings
 
     def queue_exit_command(self) -> None:
         self._pending_commands.append(ExitCommand())
@@ -40,9 +40,6 @@ class IO:
 
     def get_display_settings(self) -> DisplaySettings | None:
         return self._display_settings
-
-    def set_display_settings(self, display: DisplaySettings) -> None:
-        self._display_settings = display
 
 
 class GameLoop:

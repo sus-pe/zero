@@ -8,12 +8,28 @@ from unittest.mock import MagicMock
 
 from pytest import MonkeyPatch, fixture
 
-from zero.core import IO
+from zero.core import IO, DisplaySettings, GameLoop
+from zero.core.types import DisplayResolution
 
 
 @fixture
-def io() -> IO:
-    return IO()
+def display_resolution() -> DisplayResolution:
+    return DisplayResolution.SD_4_3
+
+
+@fixture
+def display_settings(display_resolution: DisplayResolution) -> DisplaySettings:
+    return DisplaySettings(display_resolution.value)
+
+
+@fixture
+def zero(io: IO) -> GameLoop:
+    return GameLoop(io=io)
+
+
+@fixture
+def io(display_settings: DisplaySettings) -> IO:
+    return IO(display_settings)
 
 
 class MockReload(MagicMock):
