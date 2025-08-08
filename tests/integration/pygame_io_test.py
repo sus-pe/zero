@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock
 
 from zero.core import DisplaySettings
-from zero.pygame import PygameIO
+from zero.pygame_adapter import PygameIO
 
 
 def test_pygame(mock_pygame: MagicMock, display_settings: DisplaySettings) -> None:

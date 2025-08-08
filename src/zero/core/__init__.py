@@ -38,9 +38,6 @@ class IO:
         self._pending_commands.clear()
         return res
 
-    def get_display_settings(self) -> DisplaySettings | None:
-        return self._display_settings
-
 
 class GameLoop:
     def __init__(

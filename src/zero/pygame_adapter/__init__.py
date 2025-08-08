@@ -25,10 +25,10 @@ class PygameIO(IO):
 
 def main() -> None:
     logger = logging.getLogger()
-    with PygameIO(DisplaySettings(DisplayResolution.SD_4_3.value)) as io:
-        zero = GameLoop(io=io)
-        logger.info(io.get_display_settings())
+    default_display_settings = DisplaySettings(DisplayResolution.SD_4_3.value)
 
+    with PygameIO(default_display_settings) as io:
+        zero = GameLoop(io=io)
         io.queue_exit_command()
         zero.loop_until_exit_command()
 
