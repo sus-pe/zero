@@ -1,9 +1,9 @@
-from unittest.mock import MagicMock
-
 import zero
-import zero.pygame
+import zero.pygame_adapter
+from tests.integration.conftest import MockPygame
 
 
-def test_main(mock_pygame: MagicMock) -> None:
-    zero.pygame.main()
+def test_main(mock_pygame: MockPygame) -> None:
+    zero.main()
     mock_pygame.init.assert_called_once()
+    mock_pygame.quit.assert_called_once()

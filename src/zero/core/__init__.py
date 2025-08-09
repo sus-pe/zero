@@ -1,8 +1,8 @@
 from abc import ABC
 from collections.abc import Sequence
-from typing import TypeAlias
+from dataclasses import dataclass
 
-from zero.core.types import PositiveInt
+from zero.core.types import DisplayResolution
 
 
 class Command(ABC):
@@ -13,12 +13,22 @@ class ExitCommand(Command):
     pass
 
 
-CommandQueue: TypeAlias = Sequence[Command]
+type CommandQueue = Sequence[Command]
 
 
-class Platform(ABC):
-    def __init__(self) -> None:
+@dataclass(frozen=True)
+class DisplaySettings:
+    resolution: DisplayResolution
+
+
+class IO:
+    def __init__(self, display_settings: DisplaySettings) -> None:
         self._pending_commands: list[Command] = []
+        self._display_settings = display_settings
+
+    @property
+    def display_settings(self) -> DisplaySettings:
+        return self._display_settings
 
     def queue_exit_command(self) -> None:
         self._pending_commands.append(ExitCommand())
@@ -33,15 +43,17 @@ class Platform(ABC):
         return res
 
 
-class Zero:
-    def __init__(self, platform: Platform) -> None:
+class GameLoop:
+    def __init__(
+        self,
+        io: IO,
+    ) -> None:
         self.loop_counter = 0
         self.is_exit_command = False
-        assert isinstance(platform, Platform)
-        self._platform = platform
+        self._io = io
 
     def process_pending_commands(self) -> None:
-        for command in self._platform.get_pending_commands():
+        for command in self._io.get_pending_commands():
             match command:
                 case ExitCommand():
                     self.is_exit_command = True
@@ -49,12 +61,6 @@ class Zero:
     def loop(self) -> None:
         self.loop_counter += 1
         self.process_pending_commands()
-
-    def loop_for(self, loops: PositiveInt) -> None:
-        assert loops > 0
-
-        for i in range(loops):
-            self.loop()
 
     def loop_until_exit_command(self) -> None:
         while not self.is_exit_command:

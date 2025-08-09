@@ -1,12 +1,12 @@
 from tests.conftest import FakeModules, MockReload, register_fake_modules
-from tests.utils import MockPlatform, reload_modules
-from zero.core import ExitCommand
+from tests.utils import reload_modules
+from zero.core import IO, ExitCommand
 
 
-def test_mock_exit_command(mock_platform: MockPlatform) -> None:
-    mock_platform.queue_exit_command()
-    assert isinstance(mock_platform.get_pending_commands()[0], ExitCommand)
-    assert len(mock_platform.get_pending_commands()) == 0
+def test_mock_exit_command(io: IO) -> None:
+    io.queue_exit_command()
+    assert isinstance(io.get_pending_commands()[0], ExitCommand)
+    assert len(io.get_pending_commands()) == 0
 
 
 def test_reload_modules_only_reloads_matching_prefix(
