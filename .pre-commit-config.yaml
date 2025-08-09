@@ -95,6 +95,12 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+      - id: uv-build
+        name: Build python distributables
+        entry: uv build
+        language: system
+        pass_filenames: false
+        always_run: true
       - id: pyinstaller
         name: Run PyInstaller to create the game executable
         entry: uv run pyinstaller
