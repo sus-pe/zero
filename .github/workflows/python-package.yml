@@ -4,10 +4,14 @@ name: Python package
 on:
   push:
     branches: ["master"]
+    tags:
+      - 'v*'
   pull_request:
     branches: ["master"]
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -28,3 +32,11 @@ jobs:
       - name: pre-commit
         run: |
           SKIP=no-commit-to-branch uv run pre-commit run --all-files
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          prerelease: true
+          name: "${{ github.ref }}-${{ github.sha }}"
+          fail_on_unmatched_files: true
+          files: dist/*

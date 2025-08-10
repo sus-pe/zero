@@ -25,6 +25,8 @@ git = [
 pycharm = ["setuptools==80.6.0"]
 dev = [
     "annotated-types>=0.7.0",
+    "pyinstaller>=6.15.0",
+    "pytest-asyncio>=1.1.0",
     "pytest-profiling>=1.8.1",
     "pytest-timeout>=2.4.0",
     "ty>=0.0.1a16",
