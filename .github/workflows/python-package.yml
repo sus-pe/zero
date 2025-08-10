@@ -30,11 +30,31 @@ jobs:
       - name: pre-commit
         run: |
           SKIP=no-commit-to-branch uv run pre-commit run --all-files
+      - name: Compute Release Metadata
+        id: meta
+        run: |
+          VERSION="v$(uv version --short)"
+          COMMIT="${GITHUB_SHA}"
+
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            RELEASE_ID="${VERSION}.dev${GITHUB_PR_NUMBER}-${{GITHUB_RUN_NUMBER}}.${COMMIT}"
+            DRAFT=true
+          else
+            RELEASE_ID="${VERSION}.${COMMIT}"
+            DRAFT=false
+          fi
+
+          {
+            echo "release_id=$RELEASE_ID"
+            echo "is_draft=$DRAFT"
+            echo "is_prerelease=true"
+          } >> "$GITHUB_OUTPUT"
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          draft: ${{ github.event_name == 'pull_request' }}
-          prerelease: true
-          name: "${{ github.ref }}-${{ github.sha }}"
+          tag_name: ${{ steps.meta.outputs.release_id }}
+          name: ${{ steps.meta.outputs.release_id }}
+          draft: ${{ steps.meta.outputs.is_draft }}
+          prerelease: ${{ steps.meta.outputs.is_prerelease }}
           fail_on_unmatched_files: true
           files: dist/*
