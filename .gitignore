@@ -1,3 +1,7 @@
 *.pyc
 
 .coverage
+/__main__.spec
+/build/
+/dist/
+/.venv/

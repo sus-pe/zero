@@ -37,7 +37,7 @@ jobs:
           COMMIT="${GITHUB_SHA}"
 
           if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            RELEASE_ID="${VERSION}.dev${GITHUB_PR_NUMBER}-${{GITHUB_RUN_NUMBER}}.${COMMIT}"
+            RELEASE_ID="${VERSION}.dev${GITHUB_PR_NUMBER}-${GITHUB_RUN_NUMBER}.${COMMIT}"
             DRAFT=true
           else
             RELEASE_ID="${VERSION}.${COMMIT}"
