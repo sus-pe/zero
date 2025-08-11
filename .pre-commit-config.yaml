@@ -119,12 +119,22 @@ repos:
         stages: [pre-commit]
       - id: pyinstaller
         name: Run PyInstaller to create the game executable
-        entry: uv run pyinstaller
+        entry: uv run python
         language: system
         pass_filenames: false
         always_run: true
         stages: [pre-commit]
         args:
-          - --onefile
-          - --windowed
-          - src/zero/__main__.py
+          - -c
+          - |
+            import os, platform
+            import PyInstaller.__main__
+
+            plat = platform.system().lower()
+            PyInstaller.__main__.run([
+            "src/zero/__main__.py",
+            "--noconfirm",
+            "--onefile",
+            "--windowed",
+            "--name", f"zero_{plat}",
+            ])
