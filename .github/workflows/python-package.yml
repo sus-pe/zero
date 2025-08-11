@@ -52,6 +52,7 @@ jobs:
           SKIP: no-commit-to-branch
         run: uv run pre-commit run --all-files
       - uses: actions/github-script@v7
+        name: Calculate cross-platform release metadata
         id: meta
         with:
           script: |
