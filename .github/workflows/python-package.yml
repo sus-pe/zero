@@ -16,8 +16,6 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.12"]
-    env:
-      PRE_COMMIT_HOME: ~/.cache/pre-commit
     steps:
       - uses: actions/checkout@v4
       - name: "Set up Python"
@@ -28,6 +26,15 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
+      - uses: actions/github-script@v7
+        name: Calculate cross-platform precommit cache dir
+        id: set-pre-commit-home
+        with:
+          script: |
+            const home = process.env.HOME;                // set by Actions on all OSes
+            const pch = `${home}/.cache/pre-commit`;      // unixy path string works with Python on Win too
+            core.exportVariable('PRE_COMMIT_HOME', pch);  // makes it available to later steps
+            core.info(`PRE_COMMIT_HOME = ${pch}`);
       - name: Cache venv + pre-commit
         uses: actions/cache@v4
         with:
