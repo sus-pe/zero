@@ -31,9 +31,12 @@ jobs:
         id: set-pre-commit-home
         with:
           script: |
-            const home = process.env.HOME;                // set by Actions on all OSes
-            const pch = `${home}/.cache/pre-commit`;      // unixy path string works with Python on Win too
-            core.exportVariable('PRE_COMMIT_HOME', pch);  // makes it available to later steps
+            const os = require('os');
+            const path = require('path');
+            const home = process.env.HOME || process.env.USERPROFILE || os.homedir();
+            if (!home) core.setFailed('Could not resolve HOME/USERPROFILE on this runner.');
+            const pch = path.join(home, '.cache', 'pre-commit');
+            core.exportVariable('PRE_COMMIT_HOME', pch);
             core.info(`PRE_COMMIT_HOME = ${pch}`);
       - name: Cache venv + pre-commit
         uses: actions/cache@v4
