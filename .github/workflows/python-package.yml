@@ -55,8 +55,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-dist
-          path: dist/*
-          if-no-files-found: ignore
+          path: ${{ runner.os == 'Linux' && 'dist/*' || 'dist/zero_*' }}
+          if-no-files-found: error
   release:
     needs: build
     runs-on: ubuntu-latest
