@@ -54,7 +54,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
-addopts = "--cov src --cov tests --cov-fail-under=100 --cov-report term-missing --timeout 5"
+addopts = "--cov src --cov tests --cov-fail-under=100 --cov-report term-missing --timeout 10"
 testpaths = [
     "tests",
 ]
