@@ -117,8 +117,8 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-commit]
-      - id: pyinstaller
-        name: Run PyInstaller to create the game executable
+      - id: pyinstaller-one-file
+        name: Run PyInstaller to create the game executable in one file
         entry: uv run python
         language: system
         pass_filenames: false
@@ -135,6 +135,27 @@ repos:
             "src/zero/__main__.py",
             "--noconfirm",
             "--onefile",
+            "--windowed",
+            "--name", f"zero_{plat}",
+            ])
+      - id: pyinstaller-one-dir
+        name: Run PyInstaller to create the game executable in one dir
+        entry: uv run python
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+        args:
+          - -c
+          - |
+            import os, platform
+            import PyInstaller.__main__
+
+            plat = platform.system().lower()
+            PyInstaller.__main__.run([
+            "src/zero/__main__.py",
+            "--noconfirm",
+            "--onedir",
             "--windowed",
             "--name", f"zero_{plat}",
             ])
