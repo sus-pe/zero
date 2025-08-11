@@ -41,25 +41,33 @@ jobs:
         env:
           SKIP: no-commit-to-branch
         run: uv run pre-commit run --all-files
-      - name: Compute Release Metadata
+      - uses: actions/github-script@v7
         id: meta
-        run: |
-          VERSION="v$(uv version --short)"
-          COMMIT="${GITHUB_SHA}"
+        with:
+          script: |
+            const { execSync } = require('child_process');
 
-          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
-            RELEASE_ID="${VERSION}.dev${GITHUB_PR_NUMBER}-${GITHUB_RUN_NUMBER}.${COMMIT}"
-            DRAFT=true
-          else
-            RELEASE_ID="${VERSION}.${COMMIT}"
-            DRAFT=false
-          fi
+            // Read uv version
+            const uvVersion = execSync('uv version --short', { encoding: 'utf8' }).trim();
+            const version = `v${uvVersion}`;
 
-          {
-            echo "release_id=$RELEASE_ID"
-            echo "is_draft=$DRAFT"
-            echo "is_prerelease=true"
-          } >> "$GITHUB_OUTPUT"
+            const commit = process.env.GITHUB_SHA;
+            const eventName = process.env.GITHUB_EVENT_NAME;
+            const runNumber = process.env.GITHUB_RUN_NUMBER;
+            const prNumber = (context.payload.pull_request && context.payload.pull_request.number) || '';
+
+            let release_id, draft;
+            if (eventName === 'pull_request') {
+              release_id = `${version}.dev${prNumber}-${runNumber}.${commit}`;
+              draft = true;
+            } else {
+              release_id = `${version}.${commit}`;
+              draft = false;
+            }
+
+            core.setOutput('release_id', release_id);
+            core.setOutput('is_draft', String(draft));
+            core.setOutput('is_prerelease', 'true')
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
