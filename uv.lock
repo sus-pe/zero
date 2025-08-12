@@ -700,6 +700,15 @@ wheels = [
 ]
 
 [[package]]
+name = "types-pyinstaller"
+version = "6.15.0.20250809"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d6/81/3fab7db4e0f6b0a04afe826beda27963e4655f3574e553dcf60dbb4e2453/types_pyinstaller-6.15.0.20250809.tar.gz", hash = "sha256:757b87cac0c6eb32ed2cdf3ea12b67bf08d458843d4b67434ad7789d482ff77f", size = 19414, upload-time = "2025-08-09T03:15:18.884Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6a/33/c89bb91ba4bf7a37a282a0c981c83d088d2605fa64e89557c8621e604dfb/types_pyinstaller-6.15.0.20250809-py3-none-any.whl", hash = "sha256:6c2051e66ba1f88dae523a2e0bbf5fdfb6bebbc557d73450057214c338ecd114", size = 21991, upload-time = "2025-08-09T03:15:17.654Z" },
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.14.1"
 source = { registry = "https://pypi.org/simple" }
@@ -751,6 +760,7 @@ dev = [
     { name = "pytest-profiling" },
     { name = "pytest-timeout" },
     { name = "ty" },
+    { name = "types-pyinstaller" },
 ]
 git = [
     { name = "commitizen" },
@@ -779,6 +789,7 @@ dev = [
     { name = "pytest-profiling", specifier = ">=1.8.1" },
     { name = "pytest-timeout", specifier = ">=2.4.0" },
     { name = "ty", specifier = ">=0.0.1a16" },
+    { name = "types-pyinstaller", specifier = ">=6.15.0.20250809" },
 ]
 git = [
     { name = "commitizen", specifier = ">=4.8.3,<5" },

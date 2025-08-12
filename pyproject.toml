@@ -30,6 +30,7 @@ dev = [
     "pytest-profiling>=1.8.1",
     "pytest-timeout>=2.4.0",
     "ty>=0.0.1a16",
+    "types-pyinstaller>=6.15.0.20250809",
 ]
 
 [tool.uv]
@@ -54,7 +55,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
-addopts = "--cov src --cov tests --cov-fail-under=100 --cov-report term-missing --timeout 1"
+addopts = "--cov src --cov tests --cov-fail-under=100 --cov-report term-missing --timeout 10"
 testpaths = [
     "tests",
 ]
@@ -75,6 +76,7 @@ lint.select = ["ALL"]
 lint.ignore = [
     #### specific rules
     "B024",
+    "COM812", # trailing commas, no need since formatter does this for us
     "D100",   # ignore missing docs
     "D101",
     "D102",

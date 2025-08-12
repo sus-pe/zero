@@ -1,50 +1,68 @@
 repos:
   - hooks:
       - id: trailing-whitespace
+        stages: [pre-commit]
       - id: no-commit-to-branch
+        stages: [pre-commit]
       - id: end-of-file-fixer
+        stages: [pre-commit]
         exclude: \.idea/
       - id: check-yaml
+        stages: [pre-commit]
       - id: check-added-large-files
+        stages: [pre-commit]
       - id: debug-statements
+        stages: [pre-commit]
       - id: name-tests-test
+        stages: [pre-commit]
       - id: requirements-txt-fixer
+        stages: [pre-commit]
       - id: check-merge-conflict
+        stages: [pre-commit]
     repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.8.4
     hooks:
       - id: uv-lock
+        stages: [pre-commit]
   - repo: https://github.com/abravalheri/validate-pyproject
     rev: v0.24.1
     hooks:
       - id: validate-pyproject
+        stages: [pre-commit]
   - hooks:
       - id: pyupgrade
+        stages: [pre-commit]
     repo: https://github.com/asottile/pyupgrade
     rev: v3.20.0
   - hooks:
       - id: dead
+        stages: [pre-commit]
     repo: https://github.com/asottile/dead
     rev: v2.1.0
   - hooks:
       - id: yesqa
+        stages: [pre-commit]
     repo: https://github.com/asottile/yesqa
     rev: v1.5.0
   - hooks:
       - id: yamlfmt
+        stages: [pre-commit]
     repo: https://github.com/google/yamlfmt
     rev: v0.17.0
   - hooks:
       - id: setup-cfg-fmt
+        stages: [pre-commit]
     repo: https://github.com/asottile/setup-cfg-fmt
     rev: v2.8.0
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.12.7
     hooks:
       - id: ruff-format
+        stages: [pre-commit]
       - id: ruff
+        stages: [pre-commit]
         args: [--fix, --exit-non-zero-on-fix]
         types_or: [python, pyi]
         require_serial: true
@@ -55,26 +73,20 @@ repos:
           - pre-push
     repo: https://github.com/commitizen-tools/commitizen
     rev: v4.8.3
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        stages:
+          - pre-commit
   - repo: https://github.com/rhysd/actionlint
-    # `actionlint` hook, for verifying correct syntax in GitHub Actions workflows.
-
-    # Some additional configuration for `actionlint` can be found in `.github/actionlint.yaml`.
     rev: v1.7.7
     hooks:
       - id: actionlint
         stages:
-          # This hook is disabled by default, since it's quite slow.
-          # To run all hooks *including* this hook, use `uvx pre-commit run -a --hook-stage=manual`.
-          # To run *just* this hook, use `uvx pre-commit run -a actionlint --hook-stage=manual`.
-          - manual
+          - pre-commit
         args:
-          - "-ignore=SC2129" # ignorable stylistic lint from shellcheck
-          - "-ignore=SC2016" # another shellcheck lint: seems to have false positives?
-        additional_dependencies:
-          # actionlint has a shellcheck integration which extracts shell scripts in `run:` steps from GitHub Actions
-          # and checks these with shellcheck. This is arguably its most useful feature,
-          # but the integration only works if shellcheck is installed
-          - "github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.10.0"
+          - "-color"
   - repo: local
     hooks:
       - id: test
@@ -83,31 +95,32 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+        stages: [pre-commit]
       - id: type-check-mypy
         name: mypy
         entry: uv run mypy .
         language: system
         pass_filenames: false
         always_run: true
+        stages: [pre-commit]
       - id: type-check-ty
         name: ty
         entry: uv run ty check
         language: system
         pass_filenames: false
         always_run: true
+        stages: [pre-commit]
       - id: uv-build
         name: Build python distributables
         entry: uv build
         language: system
         pass_filenames: false
         always_run: true
-      - id: pyinstaller
+        stages: [pre-commit]
+      - id: pyinstaller-one-file
         name: Run PyInstaller to create the game executable
-        entry: uv run pyinstaller
+        entry: uv run python pyinstaller_wrapper.py
         language: system
         pass_filenames: false
         always_run: true
-        args:
-          - --onefile
-          - --windowed
-          - src/zero/__main__.py
+        stages: [pre-commit]
