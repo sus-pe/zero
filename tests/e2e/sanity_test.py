@@ -1,19 +1,17 @@
-import asyncio
+from collections.abc import AsyncGenerator
+from typing import Any
 
-import pygame
-import pytest
+from pytest_asyncio import fixture
 
-from zero.__main__ import open_and_close_window
+from zero.game import Game
 
 
-@pytest.mark.asyncio
-async def test_window_auto_with_event_driven() -> None:
-    is_started_event: asyncio.Event = asyncio.Event()
+@fixture
+async def game() -> AsyncGenerator[Game, Any]:
+    async with Game() as game:
+        yield game
 
-    window_task: asyncio.Task = asyncio.create_task(
-        open_and_close_window(is_started_event),
-    )
-    await is_started_event.wait()
 
-    pygame.event.post(pygame.event.Event(pygame.QUIT))
-    await window_task
+async def test_window_auto_with_event_driven(game: Game) -> None:
+    await game.send_quit()
+    await game.wait_exit()
