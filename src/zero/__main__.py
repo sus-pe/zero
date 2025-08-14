@@ -6,7 +6,7 @@ from zero.game import Game
 
 async def main() -> int:  # pragma: no cover
     async with Game() as game:
-        await game.start_game()
+        await game.wait_exit()
     return 0
 
 
