@@ -56,6 +56,7 @@ build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 addopts = "--cov src --cov tests --cov-fail-under=100 --cov-report term-missing --timeout 10"
+asyncio_mode = "auto"
 testpaths = [
     "tests",
 ]
