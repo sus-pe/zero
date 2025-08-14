@@ -3,7 +3,7 @@ from asyncio import Event, Queue, Task, create_task, sleep
 from types import TracebackType
 
 import pygame
-from pygame import Clock
+from pygame import Clock, Surface
 
 from zero.contextmanagers import CONTEXT_MANAGER_EXIT_DO_NOT_SUPPRESS_EXCEPTION
 
@@ -48,7 +48,7 @@ class Game:
         await self._is_quit_event.wait()
 
     async def setup_display(self) -> None:
-        pygame.display.set_mode((640, 480))
+        pygame.display.set_mode((640, 480), pygame.RESIZABLE)
         pygame.display.set_caption("Automated Test Window")
 
     async def game_loop_until_quit(self) -> None:
@@ -75,6 +75,7 @@ class Game:
         pygame.init()
         try:
             await self.setup_display()
+            self.assert_resizeable()
             await self.game_loop_until_quit()
         finally:
             pygame.quit()
@@ -89,3 +90,17 @@ class Game:
             await self.send_quit()
         except pygame.error as e:
             logger.debug("caught %s", e, exc_info=e)
+
+    def assert_get_display_surface(self) -> Surface:
+        surface: Surface | None = pygame.display.get_surface()
+        assert surface
+        return surface
+
+    def assert_resizeable(self) -> None:
+        assert self.is_display_resizeable()
+
+    def is_display_resizeable(self) -> bool:
+        return bool(self.get_display_flags() & pygame.RESIZABLE)
+
+    def get_display_flags(self) -> int:
+        return self.assert_get_display_surface().get_flags()
