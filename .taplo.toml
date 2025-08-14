@@ -1,0 +1,11 @@
+exclude = [
+    ".venv/**",
+    ".git/**",
+    "venv/**",
+    "**/__pycache__/**",
+    "dist/**",
+    "build/**",
+]
+
+[formatting]
+indent_string = "    " # 4 spaces

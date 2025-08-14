@@ -5,23 +5,12 @@ description = ""
 authors = [{ name = "suspe", email = "davidp.info1@gmail.com" }]
 requires-python = ">=3.12,<4.0"
 readme = "README.md"
-dependencies = [
-    "pygame-ce>=2.5.5",
-]
+dependencies = ["pygame-ce>=2.5.5"]
 
 [dependency-groups]
-test = [
-    "pytest>=8.4.1,<9",
-    "pytest-cov>=6.2.1,<7",
-]
-code-style = [
-    "mypy>=1.17.1,<2",
-    "ruff>=0.12.7,<0.13",
-]
-git = [
-    "pre-commit>=4.2.0,<5",
-    "commitizen>=4.8.3,<5",
-]
+test = ["pytest>=8.4.1,<9", "pytest-cov>=6.2.1,<7"]
+code-style = ["mypy>=1.17.1,<2", "ruff>=0.12.7,<0.13"]
+git = ["pre-commit>=4.2.0,<5", "commitizen>=4.8.3,<5"]
 pycharm = ["setuptools==80.6.0"]
 dev = [
     "annotated-types>=0.7.0",
@@ -42,12 +31,7 @@ update_changelog_on_bump = true
 major_version_zero = true
 
 [tool.uv]
-default-groups = [
-    "test",
-    "code-style",
-    "git",
-    "pycharm",
-]
+default-groups = ["test", "code-style", "git", "pycharm"]
 
 [tool.hatch.build.targets.sdist]
 include = ["src/zero"]
@@ -65,9 +49,7 @@ build-backend = "hatchling.build"
 [tool.pytest.ini_options]
 addopts = "--cov src --cov tests --cov-fail-under=100 --cov-report term-missing --timeout 10"
 asyncio_mode = "auto"
-testpaths = [
-    "tests",
-]
+testpaths = ["tests"]
 
 [tool.ruff]
 # Auto-fix everything fixable
@@ -87,7 +69,7 @@ lint.ignore = [
     "D106",
     "D107",
     "D200",
-    "D203", # no blank line before a class
+    "D203",   # no blank line before a class
     "D205",
     "D212",
     "D400",
@@ -114,7 +96,7 @@ module = ["untyped_package.*"]
 follow_untyped_imports = true
 
 # - wip acceptance tests ------------------------------------------------------------------------- #
-[[tool.mypy.overrides]]  # THIS MUST BE CONTIGUOUS WITH THE OTHER MYPY OVERRIDES OR CZ COMMIT FAILS!
+[[tool.mypy.overrides]] # THIS MUST BE CONTIGUOUS WITH THE OTHER MYPY OVERRIDES OR CZ COMMIT FAILS!
 module = ["tests.acceptance.mouse_test"]
 ignore_errors = true
 
@@ -125,7 +107,5 @@ ignore_errors = true
 exclude = ["tests/acceptance/mouse_test.py"]
 
 [tool.coverage.run]
-omit = [
-    "tests/acceptance/mouse_test.py",
-]
+omit = ["tests/acceptance/mouse_test.py"]
 # - wip acceptance tests ------------------------------------------------------------------------- #

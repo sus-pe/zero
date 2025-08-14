@@ -1,3 +1,4 @@
+fail_fast: true
 repos:
   - hooks:
       - id: trailing-whitespace
@@ -89,6 +90,23 @@ repos:
           - "-color"
   - repo: local
     hooks:
+      - id: assert-cargo-and-taplo
+        name: Assert cargo installed and install taplo
+        entry: uv run python cargo_wrapper.py
+        language: system
+        pass_filenames: false
+      - id: taplo-fmt
+        name: Taplo format
+        entry: taplo fmt
+        language: system
+        types: [toml]
+        stages: [pre-commit]
+      - id: taplo-lint
+        name: Taplo lint
+        entry: taplo lint
+        language: system
+        types: [toml]
+        stages: [pre-commit]
       - id: type-check-mypy
         name: mypy
         entry: uv run mypy .
