@@ -33,6 +33,14 @@ dev = [
     "types-pyinstaller>=6.15.0.20250809",
 ]
 
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "uv"
+update_changelog_on_bump = true
+major_version_zero = true
+
 [tool.uv]
 default-groups = [
     "test",
@@ -60,14 +68,6 @@ asyncio_mode = "auto"
 testpaths = [
     "tests",
 ]
-
-[tool.mypy]
-check_untyped_defs = true
-disallow_untyped_defs = true
-
-[[tool.mypy.overrides]]
-module = ["untyped_package.*"]
-follow_untyped_imports = true
 
 [tool.ruff]
 # Auto-fix everything fixable
@@ -105,11 +105,27 @@ lint.ignore = [
     "PT013",
 ]
 
+[tool.mypy]
+check_untyped_defs = true
+disallow_untyped_defs = true
 
-[tool.commitizen]
-name = "cz_conventional_commits"
-tag_format = "$version"
-version_scheme = "pep440"
-version_provider = "poetry"
-update_changelog_on_bump = true
-major_version_zero = true
+[[tool.mypy.overrides]]
+module = ["untyped_package.*"]
+follow_untyped_imports = true
+
+# - wip acceptance tests ------------------------------------------------------------------------- #
+[[tool.mypy.overrides]]  # THIS MUST BE CONTIGUOUS WITH THE OTHER MYPY OVERRIDES OR CZ COMMIT FAILS!
+module = ["tests.acceptance.mouse_test"]
+ignore_errors = true
+
+[tool.ruff.lint.per-file-ignores]
+"tests/acceptance/mouse_test.py" = ["ERA001", "F821"]
+
+[tool.ty.src]
+exclude = ["tests/acceptance/mouse_test.py"]
+
+[tool.coverage.run]
+omit = [
+    "tests/acceptance/mouse_test.py",
+]
+# - wip acceptance tests ------------------------------------------------------------------------- #
