@@ -89,13 +89,6 @@ repos:
           - "-color"
   - repo: local
     hooks:
-      - id: test
-        name: Test and Assert Coverage
-        entry: uv run pytest
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-commit]
       - id: type-check-mypy
         name: mypy
         entry: uv run mypy .
@@ -113,6 +106,13 @@ repos:
       - id: uv-build
         name: Build python distributables
         entry: uv build
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+      - id: test
+        name: Test and Assert Coverage
+        entry: uv run pytest
         language: system
         pass_filenames: false
         always_run: true
