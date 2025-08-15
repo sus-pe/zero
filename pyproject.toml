@@ -8,19 +8,25 @@ readme = "README.md"
 dependencies = ["pygame-ce>=2.5.5"]
 
 [dependency-groups]
-test = ["pytest>=8.4.1,<9", "pytest-cov>=6.2.1,<7"]
-code-style = ["mypy>=1.17.1,<2", "ruff>=0.12.7,<0.13"]
 git = ["pre-commit>=4.2.0,<5", "commitizen>=4.8.3,<5"]
-pycharm = ["setuptools==80.6.0"]
-dev = [
-    "annotated-types>=0.7.0",
-    "pyinstaller>=6.15.0",
+code-style = [
+    "mypy>=1.17.1,<2",
+    "ruff>=0.12.7,<0.13",
+    "ty>=0.0.1a16",
+    "vulture>=2.14",
+]
+build = ["pyinstaller>=6.15.0", "types-pyinstaller>=6.15.0.20250809"]
+test = [
+    "pytest>=8.4.1,<9",
+    "pytest-cov>=6.2.1,<7",
     "pytest-asyncio>=1.1.0",
     "pytest-profiling>=1.8.1",
     "pytest-timeout>=2.4.0",
-    "ty>=0.0.1a16",
-    "types-pyinstaller>=6.15.0.20250809",
 ]
+pycharm = ["setuptools==80.6.0"]
+
+[tool.uv]
+default-groups = ["git", "code-style", "build", "test", "pycharm"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -30,8 +36,6 @@ version_provider = "uv"
 update_changelog_on_bump = true
 major_version_zero = true
 
-[tool.uv]
-default-groups = ["test", "code-style", "git", "pycharm"]
 
 [tool.hatch.build.targets.sdist]
 include = ["src/zero"]
@@ -50,6 +54,11 @@ build-backend = "hatchling.build"
 addopts = "--cov src --cov tests --cov-fail-under=100 --cov-report term-missing --timeout 10"
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.vulture]
+paths = ["tests"]
+sort_by_size = true
+ignore_decorators = ["@fixture"]
 
 [tool.ruff]
 # Auto-fix everything fixable

@@ -22,6 +22,10 @@ repos:
         stages: [pre-commit]
     repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: 'v2.3' # or any later Vulture version
+    hooks:
+      - id: vulture
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.8.4
     hooks:
@@ -37,11 +41,6 @@ repos:
         stages: [pre-commit]
     repo: https://github.com/asottile/pyupgrade
     rev: v3.20.0
-  - hooks:
-      - id: dead
-        stages: [pre-commit]
-    repo: https://github.com/asottile/dead
-    rev: v2.1.0
   - hooks:
       - id: yesqa
         stages: [pre-commit]
