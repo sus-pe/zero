@@ -1,3 +1,4 @@
+fail_fast: true
 repos:
   - hooks:
       - id: trailing-whitespace
@@ -21,6 +22,11 @@ repos:
         stages: [pre-commit]
     repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
+  - repo: https://github.com/jendrikseipp/vulture
+    rev: 'v2.3' # or any later Vulture version
+    hooks:
+      - id: vulture
+        stages: [pre-commit]
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.8.4
     hooks:
@@ -36,11 +42,6 @@ repos:
         stages: [pre-commit]
     repo: https://github.com/asottile/pyupgrade
     rev: v3.20.0
-  - hooks:
-      - id: dead
-        stages: [pre-commit]
-    repo: https://github.com/asottile/dead
-    rev: v2.1.0
   - hooks:
       - id: yesqa
         stages: [pre-commit]
@@ -89,12 +90,23 @@ repos:
           - "-color"
   - repo: local
     hooks:
-      - id: test
-        name: Test and Assert Coverage
-        entry: uv run pytest
+      - id: assert-cargo-and-taplo
+        name: Assert cargo and taplo installed
+        entry: uv run python cargo_wrapper.py
         language: system
         pass_filenames: false
-        always_run: true
+        stages: [pre-commit]
+      - id: taplo-fmt
+        name: Taplo format
+        entry: taplo fmt
+        language: system
+        types: [toml]
+        stages: [pre-commit]
+      - id: taplo-lint
+        name: Taplo lint
+        entry: taplo lint
+        language: system
+        types: [toml]
         stages: [pre-commit]
       - id: type-check-mypy
         name: mypy
@@ -117,10 +129,16 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-commit]
+      - id: test
+        name: Test and Assert Coverage
+        entry: uv run pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
       - id: pyinstaller-one-file
         name: Run PyInstaller to create the game executable
         entry: uv run python pyinstaller_wrapper.py
         language: system
         pass_filenames: false
-        always_run: true
         stages: [pre-commit]

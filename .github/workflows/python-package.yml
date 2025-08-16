@@ -17,17 +17,24 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.12"]
     steps:
-      - uses: actions/checkout@v4
-      - name: "Set up Python"
+      - name: "Checkout Repo"
+        uses: actions/checkout@v4
+      - name: "Setup Rust and taplo"
+        run: |
+          rustup update stable
+          rustup default stable
+          cargo --version
+          cargo install taplo-cli
+      - name: "Setup Python"
         uses: actions/setup-python@v5
         with:
           python-version-file: "pyproject.toml"
-      - name: Install uv
+      - name: "Setup uv"
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-      - uses: actions/github-script@v7
-        name: Calculate cross-platform precommit cache dir
+      - name: "Setup precommit cache dir path"
+        uses: actions/github-script@v7
         id: set-pre-commit-home
         with:
           script: |
@@ -38,20 +45,20 @@ jobs:
             const pch = path.join(home, '.cache', 'pre-commit');
             core.exportVariable('PRE_COMMIT_HOME', pch);
             core.info(`PRE_COMMIT_HOME = ${pch}`);
-      - name: Cache venv + pre-commit
+      - name: "Setup caches for venv and pre-commit"
         uses: actions/cache@v4
         with:
           path: |
             .venv
             ${{ env.PRE_COMMIT_HOME }}
           key: ${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock', '.pre-commit-config.yaml') }}
-      - name: Install the project
-        run: uv sync --locked --all-extras --dev
-      - name: pre-commit
+      - name: "Run uv sync"
+        run: uv sync --locked
+      - name: "Run pre-commit"
         env:
           SKIP: no-commit-to-branch
         run: uv run pre-commit run --all-files
-      - name: Upload artifacts
+      - name: "Upload artifacts"
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-dist
@@ -66,13 +73,14 @@ jobs:
       group: release-${{ github.ref }}
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v4
-      - name: Install uv
+      - name: "Setup repo"
+        uses: actions/checkout@v4
+      - name: "Setup uv"
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-      - uses: actions/github-script@v7
-        name: Calculate cross-platform release metadata
+      - name: "Setup cross-platform release metadata"
+        uses: actions/github-script@v7
         id: meta
         with:
           script: |
@@ -99,15 +107,15 @@ jobs:
             core.setOutput('release_id', release_id);
             core.setOutput('is_draft', String(draft));
             core.setOutput('is_prerelease', 'true')
-      - name: Download artifacts from all OSes
+      - name: "Download artifacts from latest build"
         uses: actions/download-artifact@v4
         with:
           path: release_artifacts
-      - name: List downloaded artifacts (debug)
+      - name: "[DEBUG] List downloaded artifacts"
         run: |
           echo "=== DOWNLOADED ARTIFACTS ==="
           ls -R release_artifacts || dir release_artifacts
-      - name: Release
+      - name: "Release"
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.meta.outputs.release_id }}
