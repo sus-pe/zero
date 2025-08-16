@@ -15,11 +15,13 @@ def exit_if_no_cargo() -> Path:
         )
         sys.exit(1)
 
+    logger.info("Found cargo: %s", cargo)
     return Path(cargo).resolve()
 
 
 def install_taplo(cargo: Path) -> None:
     if not shutil.which("taplo"):
+        logger.info("Executing cargo from path: %s", cargo)
         # ruff: noqa: S603 (Allow passing cargo command as parameter).
         result = subprocess.run(
             [cargo, "install", "taplo-cli"],
