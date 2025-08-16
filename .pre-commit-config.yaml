@@ -26,6 +26,7 @@ repos:
     rev: 'v2.3' # or any later Vulture version
     hooks:
       - id: vulture
+        stages: [pre-commit]
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.8.4
     hooks:
@@ -94,6 +95,7 @@ repos:
         entry: uv run python cargo_wrapper.py
         language: system
         pass_filenames: false
+        stages: [pre-commit]
       - id: taplo-fmt
         name: Taplo format
         entry: taplo fmt
