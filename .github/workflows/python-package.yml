@@ -20,7 +20,11 @@ jobs:
       - name: "Checkout Repo"
         uses: actions/checkout@v4
       - name: "Setup Rust"
-        uses: dtolnay/rust-toolchain@stable
+        run: |
+          rustup show active-toolchain || true
+          rustup toolchain install stable
+          rustup default stable
+          cargo --version
       - name: "Setup Python"
         uses: actions/setup-python@v5
         with:
