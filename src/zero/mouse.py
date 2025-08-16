@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import cached_property
 
 from zero.pygame_event_factory import (
     PygameEventFactory,
@@ -9,20 +10,46 @@ from zero.type_wrappers.arithmetic import (
     MiddleMouseBit,
     RightMouseBit,
     WindowX,
+    WindowXY,
     WindowY,
 )
 from zero.type_wrappers.typed_dict import PygameMouseMotionEventDict
 
 
 @dataclass(frozen=True)
-class MouseMotion:
+class MouseCursor:
     x: WindowX
     y: WindowY
+
+    @cached_property
+    def xy(self) -> WindowXY:
+        return (self.x, self.y)
+
+    @classmethod
+    def from_xy(cls, x: int, y: int) -> "MouseCursor":
+        return cls(x=WindowX(x), y=WindowY(y))
+
+
+@dataclass(frozen=True)
+class MouseCursorMotion:
+    cursor: MouseCursor
     dx: int
     dy: int
     left: LeftMouseBit
     middle: MiddleMouseBit
     right: RightMouseBit
+
+    @cached_property
+    def x(self) -> WindowX:
+        return self.cursor.x
+
+    @cached_property
+    def y(self) -> WindowY:
+        return self.cursor.y
+
+    @cached_property
+    def xy(self) -> WindowXY:
+        return self.cursor.xy
 
     @classmethod
     def from_xy(
@@ -34,10 +61,9 @@ class MouseMotion:
         left: int = 0,
         middle: int = 0,
         right: int = 0,
-    ) -> "MouseMotion":
+    ) -> "MouseCursorMotion":
         return cls(
-            x=WindowX(x),
-            y=WindowY(y),
+            cursor=MouseCursor.from_xy(x=x, y=y),
             dx=dx,
             dy=dy,
             left=LeftMouseBit(left),
@@ -46,10 +72,9 @@ class MouseMotion:
         )
 
     @classmethod
-    def from_pygame(cls, d: PygameMouseMotionEventDict) -> "MouseMotion":
+    def from_pygame(cls, d: PygameMouseMotionEventDict) -> "MouseCursorMotion":
         return cls(
-            x=WindowX(d["pos"][0]),
-            y=WindowY(d["pos"][1]),
+            cursor=MouseCursor.from_xy(x=d["pos"][0], y=d["pos"][1]),
             dx=d["rel"][0],
             dy=d["rel"][1],
             left=LeftMouseBit(d["buttons"][0]),
