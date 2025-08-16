@@ -1,3 +1,6 @@
+from typing import Any
+
+
 class Bit(int):
     zero: "Bit"
     one: "Bit"
@@ -41,5 +44,13 @@ class MiddleMouseBit(Bit):
     pass
 
 
-WindowX = NonNegInt
-WindowY = NonNegInt
+class WindowX(NonNegInt):
+    pass
+
+
+class WindowY(NonNegInt):
+    pass
+
+
+WindowXY = tuple[WindowX, WindowY]
+WindowPixels = Any
