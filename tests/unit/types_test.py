@@ -1,6 +1,6 @@
 from pytest import raises
 
-from zero.types import Bit, NegIntError, NonNegInt, NotBitError
+from zero.type_wrappers.arithmetic import Bit, NegIntError, NonNegInt, NotBitError
 
 
 def test_types_non_neg() -> None:

@@ -29,9 +29,17 @@ class NegIntError(ValueError):
         super().__init__(f"Negative integer: {x}")
 
 
-LeftMouseBit = Bit
-MiddleMouseBit = Bit
-RightMouseBit = Bit
+class LeftMouseBit(Bit):
+    pass
+
+
+class RightMouseBit(Bit):
+    pass
+
+
+class MiddleMouseBit(Bit):
+    pass
+
 
 WindowX = NonNegInt
 WindowY = NonNegInt

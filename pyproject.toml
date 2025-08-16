@@ -56,9 +56,10 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [tool.vulture]
-paths = ["tests"]
+paths = ["tests", "src"]
 sort_by_size = true
-ignore_decorators = ["@fixture"]
+ignore_decorators = ["@fixture", "@typed_dict"]
+exclude = ["**/typed_dict.py"]
 
 [tool.ruff]
 # Auto-fix everything fixable
@@ -68,8 +69,8 @@ lint.select = ["ALL"]
 lint.ignore = [
     #### specific rules
     "B024",
-    "COM812", # trailing commas, no need since formatter does this for us
-    "D100",   # ignore missing docs
+    "COM812",  # trailing commas, no need since formatter does this for us
+    "D100",    # ignore missing docs
     "D101",
     "D102",
     "D103",
@@ -78,20 +79,22 @@ lint.ignore = [
     "D106",
     "D107",
     "D200",
-    "D203",   # no blank line before a class
+    "D203",    # no blank line before a class
     "D205",
     "D212",
     "D400",
     "D401",
     "D415",
-    "E402",   # false positives for local imports
-    "E501",   # line too long
+    "E402",    # false positives for local imports
+    "E501",    # line too long
     "S101",
     "S311",
-    "TRY003", # external messages in exceptions are too verbose
+    "TRY003",  # external messages in exceptions are too verbose
+    "TC006",   # cast parameter as string
     "TD002",
     "TD003",
-    "FIX002", # too verbose descriptions of todos
+    "FIX002",  # too verbose descriptions of todos
+    "PLR0913", # too many parameters to a method
     "PT011",
     "PT013",
 ]
@@ -106,15 +109,15 @@ follow_untyped_imports = true
 
 # - wip acceptance tests ------------------------------------------------------------------------- #
 [[tool.mypy.overrides]] # THIS MUST BE CONTIGUOUS WITH THE OTHER MYPY OVERRIDES OR CZ COMMIT FAILS!
-module = ["tests.acceptance.mouse_test"]
+module = [""]
 ignore_errors = true
 
 [tool.ruff.lint.per-file-ignores]
-"tests/acceptance/mouse_test.py" = ["ERA001", "F821"]
+"tests/acceptance/" = []
 
 [tool.ty.src]
-exclude = ["tests/acceptance/mouse_test.py"]
+exclude = []
 
 [tool.coverage.run]
-omit = ["tests/acceptance/mouse_test.py"]
+omit = []
 # - wip acceptance tests ------------------------------------------------------------------------- #

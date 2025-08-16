@@ -1,23 +1,21 @@
 import logging
-from asyncio import Event, Queue, Task, create_task, sleep
+from asyncio import Event, Future, Queue, Task, create_task, sleep
 from types import TracebackType
+from typing import cast
 
 import pygame
 from pygame import Clock, Surface
 
 from zero.contextmanagers import CONTEXT_MANAGER_EXIT_DO_NOT_SUPPRESS_EXCEPTION
+from zero.mouse import MouseMotion
+from zero.type_wrappers.typed_dict import PygameMouseMotionEventDict
 
 logger = logging.getLogger(__name__)
 
 
-class ResizeEvent:
-    width: float
-    height: float
-
-
 class Game:
     def __init__(self) -> None:
-        self._resize_event_queue: Queue[ResizeEvent] = Queue()
+        self._next_mouse_motion_subscribers: Queue[Future[MouseMotion]] = Queue()
         self._is_quit_event: Event = Event()
         self._window_task: Task[None] | None = None
         self._is_started_event: Event = Event()
@@ -32,9 +30,9 @@ class Game:
 
     async def __aexit__(
         self,
-        exc_type: type[BaseException] | None,
-        exc_val: BaseException | None,
-        exc_tb: TracebackType | None,
+        _exc_type: type[BaseException] | None,
+        _exc_val: BaseException | None,
+        _exc_tb: TracebackType | None,
     ) -> bool | None:
         assert self._is_started_event.is_set()
         assert self._window_task is not None
@@ -62,12 +60,23 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
+                elif event.type == pygame.MOUSEMOTION:
+                    await self.publish_mouse_motion_event(
+                        cast(PygameMouseMotionEventDict, event.dict)
+                    )
 
             pygame.display.flip()
 
             # yield event loop
             await sleep(0)
             clock.tick(self._fps)
+
+    async def publish_mouse_motion_event(
+        self, mouse_motion_event: PygameMouseMotionEventDict
+    ) -> None:
+        while not self._next_mouse_motion_subscribers.empty():
+            f = self._next_mouse_motion_subscribers.get_nowait()
+            f.set_result(MouseMotion.from_pygame(mouse_motion_event))
 
     async def start_game(self) -> None:
         assert not self._is_quit_event.is_set()
@@ -104,3 +113,11 @@ class Game:
 
     def get_display_flags(self) -> int:
         return self.assert_get_display_surface().get_flags()
+
+    async def wait_for_next_mouse_motion(self) -> MouseMotion:
+        f: Future[MouseMotion] = Future()
+        await self._notify_next_mouse_motion(f)
+        return await f
+
+    async def _notify_next_mouse_motion(self, f: Future[MouseMotion]) -> None:
+        await self._next_mouse_motion_subscribers.put(f)
