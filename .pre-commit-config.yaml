@@ -90,7 +90,7 @@ repos:
   - repo: local
     hooks:
       - id: assert-cargo-and-taplo
-        name: Assert cargo installed and install taplo
+        name: Assert cargo and taplo installed
         entry: uv run python cargo_wrapper.py
         language: system
         pass_filenames: false

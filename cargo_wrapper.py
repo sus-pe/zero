@@ -1,13 +1,11 @@
 import logging
 import shutil
-import subprocess
 import sys
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 
-def exit_if_no_cargo() -> Path:
+def exit_if_no_cargo() -> None:
     cargo = shutil.which("cargo")
     if not cargo:
         logger.error(
@@ -15,28 +13,13 @@ def exit_if_no_cargo() -> Path:
         )
         sys.exit(1)
 
-    logger.info("Found cargo: %s", cargo)
-    return Path(cargo).resolve()
 
-
-def install_taplo(cargo: Path) -> None:
+def exit_if_no_taplo() -> None:
     if not shutil.which("taplo"):
-        logger.info("Executing cargo from path: %s", cargo)
-        # ruff: noqa: S603 (Allow passing cargo command as parameter).
-        result = subprocess.run(
-            [cargo, "install", "taplo-cli"],
-            check=False,  # let us inspect returncode instead of raising
-        )
-
-        if result.returncode == 0:
-            logger.info("✅ Taplo installed successfully.")
-        else:
-            logger.error(
-                "❌ Failed to execute `cargo install taplo-cli`, please debug. "
-            )
-            sys.exit(result.returncode)
+        logger.error("taplo-cli not installed. Please install via cargo!")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    cargo_path = exit_if_no_cargo()
-    install_taplo(cargo_path)
+    exit_if_no_cargo()
+    exit_if_no_taplo()
