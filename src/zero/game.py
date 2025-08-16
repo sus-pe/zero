@@ -121,3 +121,6 @@ class Game:
 
     async def _notify_next_mouse_motion(self, f: Future[MouseMotion]) -> None:
         await self._next_mouse_motion_subscribers.put(f)
+
+    def send_mouse_motion(self, expected_mouse: MouseMotion) -> None:
+        pygame.event.post(expected_mouse.as_pygame_event())
