@@ -21,8 +21,7 @@ jobs:
         uses: actions/checkout@v4
       - name: "Setup Rust"
         run: |
-          rustup show active-toolchain || true
-          rustup toolchain install stable
+          rustup update stable
           rustup default stable
           cargo --version
       - name: "Setup Python"
