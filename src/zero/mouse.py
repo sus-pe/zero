@@ -9,15 +9,13 @@ from zero.type_wrappers.arithmetic import (
     LeftMouseBit,
     MiddleMouseBit,
     RightMouseBit,
-    WindowX,
-    WindowXY,
-    WindowY,
 )
 from zero.type_wrappers.typed_dict import PygameMouseMotionEventDict
+from zero.type_wrappers.window import WindowX, WindowXY, WindowY
 
 
 @dataclass(frozen=True)
-class MouseCursor:
+class MouseCursorXY:
     x: WindowX
     y: WindowY
 
@@ -26,13 +24,13 @@ class MouseCursor:
         return WindowXY(self.x, self.y)
 
     @classmethod
-    def from_xy(cls, x: int, y: int) -> "MouseCursor":
+    def from_xy(cls, x: int, y: int) -> "MouseCursorXY":
         return cls(x=WindowX(x), y=WindowY(y))
 
 
 @dataclass(frozen=True)
 class MouseCursorMotion:
-    cursor: MouseCursor
+    cursor: MouseCursorXY
     dx: int
     dy: int
     left: LeftMouseBit
@@ -63,7 +61,7 @@ class MouseCursorMotion:
         right: int = 0,
     ) -> "MouseCursorMotion":
         return cls(
-            cursor=MouseCursor.from_xy(x=x, y=y),
+            cursor=MouseCursorXY.from_xy(x=x, y=y),
             dx=dx,
             dy=dy,
             left=LeftMouseBit(left),
@@ -74,7 +72,7 @@ class MouseCursorMotion:
     @classmethod
     def from_pygame(cls, d: PygameMouseMotionEventDict) -> "MouseCursorMotion":
         return cls(
-            cursor=MouseCursor.from_xy(x=d["pos"][0], y=d["pos"][1]),
+            cursor=MouseCursorXY.from_xy(x=d["pos"][0], y=d["pos"][1]),
             dx=d["rel"][0],
             dy=d["rel"][1],
             left=LeftMouseBit(d["buttons"][0]),

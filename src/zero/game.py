@@ -1,5 +1,6 @@
 import logging
 from asyncio import Event, Future, Queue, Task, create_task, sleep
+from contextlib import suppress
 from types import TracebackType
 from typing import cast
 
@@ -7,9 +8,11 @@ import pygame
 from pygame import Clock, Surface
 
 from zero.contextmanagers import CONTEXT_MANAGER_EXIT_DO_NOT_SUPPRESS_EXCEPTION
-from zero.mouse import MouseCursor, MouseCursorMotion
-from zero.type_wrappers.arithmetic import WindowPixels
+from zero.mouse import MouseCursorMotion, MouseCursorXY
+from zero.resources.loader import ResourceLoader
+from zero.resources.sprites.cursor import MouseCursorSprite
 from zero.type_wrappers.typed_dict import PygameMouseMotionEventDict
+from zero.type_wrappers.window import WindowView
 
 logger = logging.getLogger(__name__)
 
@@ -18,18 +21,22 @@ CursorController = Task[None]
 
 class Game:
     def __init__(self) -> None:
+        self._resource_fetcher = ResourceLoader()
         self._window: Surface | None = None
-        self._mouse_cursor: MouseCursor | None = None
+        self._mouse_cursor: MouseCursorXY | None = None
         self._next_mouse_motion_subscribers: Queue[
             Future[MouseCursorMotion] | Queue[MouseCursorMotion]
         ] = Queue()
-        self._is_quit_event: Event = Event()
-        self._window_task: Task[None] | None = None
         self._is_started_event: Event = Event()
+        self._is_quit_event: Event = Event()
+        self._is_aexit_event: Event = Event()
+        self._window_task: Task[None] | None = None
         self._fps: int = 240
         self._cursor_controller: CursorController | None = None
 
     async def __aenter__(self) -> "Game":
+        assert not self._is_started_event.is_set()
+        assert not self._is_quit_event.is_set()
         self._window_task = create_task(
             self.start_game(),
         )
@@ -43,12 +50,11 @@ class Game:
         _exc_tb: TracebackType | None,
     ) -> bool | None:
         assert self._is_started_event.is_set()
-        assert not self._is_quit_event.is_set()
-        assert self._window_task is not None
-        await self.send_quit()
+        await self.try_send_quit()
         await self.wait_exit()
+        assert self._is_quit_event.is_set()
+        assert self._window_task, "Supposed to be initialized"
         await self._window_task
-        self._is_quit_event.set()
         return CONTEXT_MANAGER_EXIT_DO_NOT_SUPPRESS_EXCEPTION
 
     async def wait_exit(self) -> None:
@@ -61,11 +67,9 @@ class Game:
 
     async def game_loop_until_quit(self) -> None:
         assert self._fps > 0
-        assert not self._is_started_event.is_set()
 
         running = True
         clock: Clock = pygame.time.Clock()
-        self._is_started_event.set()
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -100,19 +104,24 @@ class Game:
     async def start_game(self) -> None:
         assert not self._is_quit_event.is_set()
         assert not self._is_started_event.is_set()
-        pygame.init()
+
+        self._is_started_event.set()
         try:
+            pygame.init()
             await self.setup_display()
             self.assert_resizeable()
             await self.setup_mouse_cursor()
             await self.game_loop_until_quit()
         finally:
-            pygame.quit()
-            assert not self._is_quit_event.is_set()
             self._is_quit_event.set()
+            pygame.quit()
 
     async def send_quit(self) -> None:
         pygame.event.post(pygame.event.Event(pygame.QUIT))
+
+    async def try_send_quit(self) -> None:
+        with suppress(pygame.error):
+            await self.send_quit()
 
     def assert_get_display_surface(self) -> Surface:
         surface: Surface | None = pygame.display.get_surface()
@@ -139,7 +148,7 @@ class Game:
     def send_mouse_motion(self, expected_mouse: MouseCursorMotion) -> None:
         pygame.event.post(expected_mouse.as_pygame_event())
 
-    def get_mouse_cursor(self) -> MouseCursor:
+    def get_mouse_cursor_xy(self) -> MouseCursorXY:
         assert self._mouse_cursor, "Supposed to be initialized"
         return self._mouse_cursor
 
@@ -162,10 +171,18 @@ class Game:
         while not self._is_quit_event.is_set():
             motion = await events.get()
             self._mouse_cursor = motion.cursor
+            self._render_mouse_cursor_at(self._mouse_cursor)
 
     async def _load_cursor_img(self) -> None:
         pass
 
-    def get_window_pixels(self) -> WindowPixels:
+    def get_window_view(self) -> WindowView:
         assert self._window, "Supposed to be initialized!"
-        return pygame.surfarray.array2d(self._window)
+        return WindowView(pygame.surfarray.array2d(self._window))
+
+    def get_mouse_cursor_sprite(self) -> MouseCursorSprite:
+        return self._resource_fetcher.cursor_sprite
+
+    def _render_mouse_cursor_at(self, mouse_cursor: MouseCursorXY) -> None:
+        assert self._window, "Supposed to be initialized!"
+        self.get_mouse_cursor_sprite().blit_to(self._window, mouse_cursor.xy)

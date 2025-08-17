@@ -1,19 +1,19 @@
 from tests.conftest import parametrize
-from zero.mouse import MouseCursor, MouseCursorMotion
+from zero.mouse import MouseCursorMotion, MouseCursorXY
 from zero.type_wrappers.arithmetic import (
     Bit,
     LeftMouseBit,
     MiddleMouseBit,
     RightMouseBit,
-    WindowXY,
 )
+from zero.type_wrappers.window import WindowXY
 
 
 @parametrize(
     argnames="mouse",
     argvalues=[
         MouseCursorMotion(
-            cursor=MouseCursor.from_xy(x=131509, y=9123),
+            cursor=MouseCursorXY.from_xy(x=131509, y=9123),
             dx=-11324,
             dy=1123,
             left=LeftMouseBit(Bit.one),
@@ -36,4 +36,4 @@ def test_mouse_basic(mouse: MouseCursorMotion) -> None:
 
 
 def test_mouse_cursor() -> None:
-    MouseCursor.from_xy(x=0, y=0)
+    MouseCursorXY.from_xy(x=0, y=0)

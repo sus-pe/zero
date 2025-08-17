@@ -1,9 +1,3 @@
-from dataclasses import dataclass
-
-import numpy as np
-import numpy.typing as npt
-
-
 class Bit(int):
     zero: "Bit"
     one: "Bit"
@@ -45,32 +39,3 @@ class RightMouseBit(Bit):
 
 class MiddleMouseBit(Bit):
     pass
-
-
-class WindowX(NonNegInt):
-    pass
-
-
-class WindowY(NonNegInt):
-    pass
-
-
-@dataclass(frozen=True)
-class WindowXY:
-    x: WindowX
-    y: WindowY
-
-    @classmethod
-    def from_xy(cls, x: int, y: int) -> "WindowXY":
-        x = WindowX(x)
-        y = WindowY(y)
-        return cls(x, y)
-
-    def __add__(self, other: "WindowXY") -> "WindowXY":
-        return WindowXY.from_xy(self.x + other.x, self.y + other.y)
-
-    def __ge__(self, other: "WindowXY") -> bool:
-        return self.x >= other.x and self.y >= other.y
-
-
-WindowPixels = npt.NDArray[np.int32]
