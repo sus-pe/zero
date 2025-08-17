@@ -1,4 +1,5 @@
-from typing import Any
+import numpy as np
+import numpy.typing as npt
 
 
 class Bit(int):
@@ -52,5 +53,13 @@ class WindowY(NonNegInt):
     pass
 
 
-WindowXY = tuple[WindowX, WindowY]
-WindowPixels = Any
+class WindowXY(tuple[WindowX, WindowY]):
+    def __new__(cls, x: int, y: int) -> "WindowXY":
+        x = WindowX(x)
+        y = WindowY(y)
+        return super().__new__(cls, (x, y))
+
+    __slots__ = ()
+
+
+WindowPixels = npt.NDArray[np.int32]

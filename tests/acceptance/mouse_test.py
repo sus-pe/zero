@@ -2,7 +2,6 @@ from collections.abc import Iterable
 
 from pytest_asyncio import fixture
 
-from tests.conftest import xfail
 from zero.game import Game
 from zero.mouse import MouseCursorMotion
 
@@ -25,7 +24,6 @@ async def test_mouse(
         assert mouse == stub
 
 
-@xfail(strict=True)
 async def test_mouse_cursor(
     game: Game, stub_mouse_motions: Iterable[MouseCursorMotion]
 ) -> None:
@@ -34,5 +32,5 @@ async def test_mouse_cursor(
         await game.wait_for_next_mouse_motion()
         cursor = game.get_mouse_cursor()
         assert cursor.xy == stub.xy
-
-        game.get_window_pixels()
+        window_pixels = game.get_window_pixels()
+        assert window_pixels is not None

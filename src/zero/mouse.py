@@ -23,7 +23,7 @@ class MouseCursor:
 
     @cached_property
     def xy(self) -> WindowXY:
-        return (self.x, self.y)
+        return WindowXY(self.x, self.y)
 
     @classmethod
     def from_xy(cls, x: int, y: int) -> "MouseCursor":

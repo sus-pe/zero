@@ -55,7 +55,8 @@ class Game:
         await self._is_quit_event.wait()
 
     async def setup_display(self) -> None:
-        pygame.display.set_mode((640, 480), pygame.RESIZABLE)
+        assert not self._window, "Not supposed to be initialized yet!"
+        self._window = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
         pygame.display.set_caption("Automated Test Window")
 
     async def game_loop_until_quit(self) -> None:
@@ -167,4 +168,4 @@ class Game:
 
     def get_window_pixels(self) -> WindowPixels:
         assert self._window, "Supposed to be initialized!"
-        # Soon: return pygame.surfarray.array2d(self._window)
+        return pygame.surfarray.array2d(self._window)
