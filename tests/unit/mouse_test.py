@@ -5,6 +5,7 @@ from zero.type_wrappers.arithmetic import (
     LeftMouseBit,
     MiddleMouseBit,
     RightMouseBit,
+    WindowXY,
 )
 
 
@@ -31,7 +32,7 @@ def test_mouse_basic(mouse: MouseCursorMotion) -> None:
 
     assert mouse == MouseCursorMotion.from_pygame(pygame_mouse)
     assert mouse.as_pygame_event()
-    assert mouse.cursor.xy == pygame_mouse["pos"]
+    assert mouse.cursor.xy == WindowXY.from_xy(*pygame_mouse["pos"])
 
 
 def test_mouse_cursor() -> None:

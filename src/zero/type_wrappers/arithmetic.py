@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import numpy as np
 import numpy.typing as npt
 
@@ -53,13 +55,22 @@ class WindowY(NonNegInt):
     pass
 
 
-class WindowXY(tuple[WindowX, WindowY]):
-    def __new__(cls, x: int, y: int) -> "WindowXY":
+@dataclass(frozen=True)
+class WindowXY:
+    x: WindowX
+    y: WindowY
+
+    @classmethod
+    def from_xy(cls, x: int, y: int) -> "WindowXY":
         x = WindowX(x)
         y = WindowY(y)
-        return super().__new__(cls, (x, y))
+        return cls(x, y)
 
-    __slots__ = ()
+    def __add__(self, other: "WindowXY") -> "WindowXY":
+        return WindowXY.from_xy(self.x + other.x, self.y + other.y)
+
+    def __ge__(self, other: "WindowXY") -> bool:
+        return self.x >= other.x and self.y >= other.y
 
 
 WindowPixels = npt.NDArray[np.int32]
