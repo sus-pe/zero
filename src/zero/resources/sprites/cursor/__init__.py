@@ -85,7 +85,7 @@ class Sprite:
 
     @classmethod
     def _load_surface(cls, path: Path) -> Surface:
-        assert path.is_file()
+        assert path.is_file(), f"Provided {path=} could not be found!"
         return pygame.image.load(path)
 
     @classmethod
