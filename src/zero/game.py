@@ -1,6 +1,7 @@
 import logging
 from asyncio import Event, Future, Queue, Task, create_task, sleep
 from contextlib import suppress
+from functools import cached_property
 from types import TracebackType
 from typing import cast
 
@@ -10,9 +11,9 @@ from pygame import Clock, Surface
 from zero.contextmanagers import CONTEXT_MANAGER_EXIT_DO_NOT_SUPPRESS_EXCEPTION
 from zero.mouse import MouseCursorMotion, MouseCursorXY
 from zero.resources.loader import ResourceLoader
-from zero.resources.sprites.cursor import MouseCursorSprite
+from zero.resources.sprites.cursor import MouseCursorSprite, Sprite
 from zero.type_wrappers.typed_dict import PygameMouseMotionEventDict
-from zero.type_wrappers.window import WindowView
+from zero.type_wrappers.window import WindowXY
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ CursorController = Task[None]
 class Game:
     def __init__(self) -> None:
         self._resource_fetcher = ResourceLoader()
-        self._window: Surface | None = None
+        self._window_surface: Surface | None = None
         self._mouse_cursor: MouseCursorXY | None = None
         self._next_mouse_motion_subscribers: Queue[
             Future[MouseCursorMotion] | Queue[MouseCursorMotion]
@@ -61,16 +62,19 @@ class Game:
         await self._is_quit_event.wait()
 
     async def setup_display(self) -> None:
-        assert not self._window, "Not supposed to be initialized yet!"
-        self._window = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
+        assert not self._window_surface, "Not supposed to be initialized yet!"
+        self._window_surface = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
         pygame.display.set_caption("Automated Test Window")
 
     async def game_loop_until_quit(self) -> None:
         assert self._fps > 0
+        assert self._window_surface, "Supposed to be initialized!"
+        assert self._mouse_cursor, "Supposed to be initialized!"
 
         running = True
         clock: Clock = pygame.time.Clock()
         while running:
+            self._window_surface.fill((0, 0, 0))
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -79,6 +83,7 @@ class Game:
                         cast(PygameMouseMotionEventDict, event.dict)
                     )
 
+            self._render_mouse_cursor_at(self._mouse_cursor)
             pygame.display.flip()
 
             # yield event loop
@@ -155,6 +160,7 @@ class Game:
     async def setup_mouse_cursor(self) -> None:
         assert not self._mouse_cursor, "Not supposed to be initiazlied yet."
         cursor_events_queue = await self._start_cursor_controller()
+        self._mouse_cursor = MouseCursorXY.zero_origin()
         await self._next_mouse_motion_subscribers.put(cursor_events_queue)
         await self._load_cursor_img()
 
@@ -176,13 +182,17 @@ class Game:
     async def _load_cursor_img(self) -> None:
         pass
 
-    def get_window_view(self) -> WindowView:
-        assert self._window, "Supposed to be initialized!"
-        return WindowView(pygame.surfarray.array2d(self._window))
-
-    def get_mouse_cursor_sprite(self) -> MouseCursorSprite:
-        return self._resource_fetcher.cursor_sprite
+    @cached_property
+    def mouse_cursor_sprite(self) -> MouseCursorSprite:
+        assert self._window_surface, "Supposed to be initialized!"
+        return self._resource_fetcher.convert_cursor_sprite
 
     def _render_mouse_cursor_at(self, mouse_cursor: MouseCursorXY) -> None:
-        assert self._window, "Supposed to be initialized!"
-        self.get_mouse_cursor_sprite().blit_to(self._window, mouse_cursor.xy)
+        assert self._window_surface, "Supposed to be initialized!"
+        assert mouse_cursor, "Supposed to be initialized!"
+        self.mouse_cursor_sprite.blit_to(self._window_surface, mouse_cursor)
+
+    def is_displayed(self, sprite: Sprite, xy: WindowXY) -> bool:
+        assert self._window_surface, "Supposed to be initialized!"
+        display_rect = self._window_surface.subsurface(sprite.rect_at(xy))
+        return sprite.is_displayed_by(display_rect)

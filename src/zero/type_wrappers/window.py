@@ -21,6 +21,10 @@ class WindowXY:
     y: WindowY
 
     @classmethod
+    def zero_origin(cls) -> "WindowXY":
+        return WindowXY.from_xy(0, 0)
+
+    @classmethod
     def from_xy(cls, x: int, y: int) -> "WindowXY":
         x = WindowX(x)
         y = WindowY(y)
@@ -60,17 +64,3 @@ class WindowView:
     def is_containing_at(self, xy: WindowXY, other: WindowPixels) -> bool:
         required_minimum_shape = xy + WindowXY.from_xy(*other.shape)
         return required_minimum_shape >= WindowXY.from_xy(*self.pixels.shape)
-
-    def contains(self, pixels: WindowPixels, *, at: WindowXY) -> bool:
-        spare_width = self.width - at.x
-        width = pixels.shape[0]
-        if width > spare_width:
-            return False
-
-        spare_height = self.height - at.y
-        height = pixels.shape[1]
-        if height > spare_height:
-            return False
-
-        window_slice = self.pixels[at.x : at.x + width, at.y : at.y + height]
-        return np.array_equal(window_slice, pixels)

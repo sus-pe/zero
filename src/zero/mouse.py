@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from functools import cached_property
+from typing import cast
 
 from zero.pygame_event_factory import (
     PygameEventFactory,
@@ -15,17 +16,14 @@ from zero.type_wrappers.window import WindowX, WindowXY, WindowY
 
 
 @dataclass(frozen=True)
-class MouseCursorXY:
-    x: WindowX
-    y: WindowY
-
-    @cached_property
-    def xy(self) -> WindowXY:
-        return WindowXY(self.x, self.y)
-
+class MouseCursorXY(WindowXY):
     @classmethod
     def from_xy(cls, x: int, y: int) -> "MouseCursorXY":
-        return cls(x=WindowX(x), y=WindowY(y))
+        return cast(MouseCursorXY, super().from_xy(x, y))
+
+    @classmethod
+    def zero_origin(cls) -> "MouseCursorXY":
+        return cast(MouseCursorXY, super().zero_origin())
 
 
 @dataclass(frozen=True)
@@ -47,7 +45,7 @@ class MouseCursorMotion:
 
     @cached_property
     def xy(self) -> WindowXY:
-        return self.cursor.xy
+        return self.cursor
 
     @classmethod
     def from_xy(
