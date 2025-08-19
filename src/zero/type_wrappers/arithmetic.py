@@ -39,7 +39,3 @@ class RightMouseBit(Bit):
 
 class MiddleMouseBit(Bit):
     pass
-
-
-WindowX = NonNegInt
-WindowY = NonNegInt

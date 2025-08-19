@@ -1,31 +1,27 @@
 from tests.conftest import parametrize
-from zero.mouse import MouseMotion
+from zero.mouse import MouseCursorMotion, MouseCursorXY
 from zero.type_wrappers.arithmetic import (
     Bit,
     LeftMouseBit,
     MiddleMouseBit,
     RightMouseBit,
-    WindowX,
-    WindowY,
 )
 
 
 @parametrize(
     argnames="mouse",
     argvalues=[
-        MouseMotion.from_xy(x=0, y=0),
-        MouseMotion(
-            x=WindowX(0),
-            y=WindowY(0),
-            dx=-1,
-            dy=1,
+        MouseCursorMotion(
+            cursor=MouseCursorXY.from_xy(x=131509, y=9123),
+            dx=-11324,
+            dy=1123,
             left=LeftMouseBit(Bit.one),
             right=RightMouseBit(1),
             middle=MiddleMouseBit(0),
         ),
     ],
 )
-def test_mouse_basic(mouse: MouseMotion) -> None:
+def test_mouse_basic(mouse: MouseCursorMotion) -> None:
     pygame_mouse = mouse.as_pygame()
     assert pygame_mouse == {
         "pos": (mouse.x, mouse.y),
@@ -33,5 +29,10 @@ def test_mouse_basic(mouse: MouseMotion) -> None:
         "buttons": (mouse.left, mouse.middle, mouse.right),
     }
 
-    assert mouse == MouseMotion.from_pygame(pygame_mouse)
+    assert mouse == MouseCursorMotion.from_pygame(pygame_mouse)
     assert mouse.as_pygame_event()
+    assert mouse.cursor == MouseCursorXY.from_xy(*pygame_mouse["pos"])
+
+
+def test_mouse_cursor() -> None:
+    MouseCursorXY.from_xy(x=0, y=0)

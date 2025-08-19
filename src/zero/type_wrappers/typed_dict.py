@@ -4,9 +4,8 @@ from zero.type_wrappers.arithmetic import (
     LeftMouseBit,
     MiddleMouseBit,
     RightMouseBit,
-    WindowX,
-    WindowY,
 )
+from zero.type_wrappers.window import WindowX, WindowY
 
 
 class PygameEventDict(TypedDict):

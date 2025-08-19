@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from functools import cached_property
+from typing import cast
 
 from zero.pygame_event_factory import (
     PygameEventFactory,
@@ -8,21 +10,42 @@ from zero.type_wrappers.arithmetic import (
     LeftMouseBit,
     MiddleMouseBit,
     RightMouseBit,
-    WindowX,
-    WindowY,
 )
 from zero.type_wrappers.typed_dict import PygameMouseMotionEventDict
+from zero.type_wrappers.window import WindowX, WindowXY, WindowY
 
 
 @dataclass(frozen=True)
-class MouseMotion:
-    x: WindowX
-    y: WindowY
+class MouseCursorXY(WindowXY):
+    @classmethod
+    def from_xy(cls, x: int, y: int) -> "MouseCursorXY":
+        return cast(MouseCursorXY, super().from_xy(x, y))
+
+    @classmethod
+    def zero_origin(cls) -> "MouseCursorXY":
+        return cast(MouseCursorXY, super().zero_origin())
+
+
+@dataclass(frozen=True)
+class MouseCursorMotion:
+    cursor: MouseCursorXY
     dx: int
     dy: int
     left: LeftMouseBit
     middle: MiddleMouseBit
     right: RightMouseBit
+
+    @cached_property
+    def x(self) -> WindowX:
+        return self.cursor.x
+
+    @cached_property
+    def y(self) -> WindowY:
+        return self.cursor.y
+
+    @cached_property
+    def xy(self) -> WindowXY:
+        return self.cursor
 
     @classmethod
     def from_xy(
@@ -34,10 +57,9 @@ class MouseMotion:
         left: int = 0,
         middle: int = 0,
         right: int = 0,
-    ) -> "MouseMotion":
+    ) -> "MouseCursorMotion":
         return cls(
-            x=WindowX(x),
-            y=WindowY(y),
+            cursor=MouseCursorXY.from_xy(x=x, y=y),
             dx=dx,
             dy=dy,
             left=LeftMouseBit(left),
@@ -46,10 +68,9 @@ class MouseMotion:
         )
 
     @classmethod
-    def from_pygame(cls, d: PygameMouseMotionEventDict) -> "MouseMotion":
+    def from_pygame(cls, d: PygameMouseMotionEventDict) -> "MouseCursorMotion":
         return cls(
-            x=WindowX(d["pos"][0]),
-            y=WindowY(d["pos"][1]),
+            cursor=MouseCursorXY.from_xy(x=d["pos"][0], y=d["pos"][1]),
             dx=d["rel"][0],
             dy=d["rel"][1],
             left=LeftMouseBit(d["buttons"][0]),

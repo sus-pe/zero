@@ -5,7 +5,7 @@ description = ""
 authors = [{ name = "suspe", email = "davidp.info1@gmail.com" }]
 requires-python = ">=3.12,<4.0"
 readme = "README.md"
-dependencies = ["pygame-ce>=2.5.5"]
+dependencies = ["numpy>=2.3.2", "pygame-ce>=2.5.5"]
 
 [dependency-groups]
 git = ["pre-commit>=4.2.0,<5", "commitizen>=4.8.3,<5"]
@@ -60,6 +60,7 @@ paths = ["tests", "src"]
 sort_by_size = true
 ignore_decorators = ["@fixture", "@typed_dict"]
 exclude = ["**/typed_dict.py"]
+min_confidence = 80
 
 [tool.ruff]
 # Auto-fix everything fixable
