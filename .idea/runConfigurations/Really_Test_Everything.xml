@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Really Test Everything" type="CompoundRunConfigurationType">
+    <toRun name="cargo_wrapper" type="UvRunConfigurationType" />
+    <toRun name="mypy" type="UvRunConfigurationType" />
+    <toRun name="pyinstaller_wrapper" type="UvRunConfigurationType" />
+    <toRun name="ruff format" type="UvRunConfigurationType" />
+    <toRun name="ruff linter" type="UvRunConfigurationType" />
+    <toRun name="test" type="UvRunConfigurationType" />
+    <toRun name="type check" type="UvRunConfigurationType" />
+    <toRun name="vulture" type="UvRunConfigurationType" />
+    <method v="2" />
+  </configuration>
+</component>

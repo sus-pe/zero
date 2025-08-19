@@ -6,3 +6,4 @@
 /dist/
 /.venv/
 /zero_windows.spec
+/zero_windows.exe.spec
