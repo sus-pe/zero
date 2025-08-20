@@ -1,4 +1,5 @@
 from os import environ
+from pathlib import Path
 
 import pytest
 from pytest_asyncio import fixture
@@ -18,3 +19,8 @@ async def sdl_headless_env() -> None:
 @fixture
 async def resource_loader() -> ResourceLoader:
     return ResourceLoader()
+
+
+@fixture(scope="session")
+async def project_root() -> Path:
+    return Path(__file__).parent.parent.resolve()

@@ -12,13 +12,13 @@ class BuildArtifacts:
     bin_path: Path
 
 
-def main() -> None:
-    artifacts = build()
+def test_pyinstaller(project_root: Path) -> None:
+    artifacts = build(project_root)
     assert artifacts.bin_path.is_file()
     assert artifacts.zip_path.is_file()
 
 
-def build() -> BuildArtifacts:
+def build(project_root: Path) -> BuildArtifacts:
     plat = platform.system().lower()
     name = f"zero_{plat}"
     binary_name = f"{name}.exe" if plat == "windows" else name
@@ -33,9 +33,9 @@ def build() -> BuildArtifacts:
             name,
         ],
     )
-    dist_name = Path(f"dist/{name}")
+    dist_name = project_root / Path(f"dist/{name}")
     artifacts_root_dir = dist_name
-    dist_dir = Path("dist")
+    dist_dir = project_root / Path("dist")
     zip_file = Path(f"{name}.zip")
     dist_zip = dist_dir / zip_file
     shutil.make_archive(name, "zip", artifacts_root_dir)
@@ -54,7 +54,3 @@ def build() -> BuildArtifacts:
     )
     dist_binary = dist_dir / binary_name
     return BuildArtifacts(dist_zip, dist_binary)
-
-
-if __name__ == "__main__":
-    main()

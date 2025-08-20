@@ -56,7 +56,7 @@ asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [tool.vulture]
-paths = ["tests", "src", "pyinstaller_wrapper.py", "cargo_wrapper.py"]
+paths = ["tests", "src"]
 sort_by_size = true
 ignore_decorators = ["@fixture", "@typed_dict"]
 exclude = ["**/typed_dict.py"]
