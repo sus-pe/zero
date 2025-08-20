@@ -54,6 +54,7 @@ build-backend = "hatchling.build"
 addopts = "--cov src --cov tests --cov-fail-under=100 --cov-report term-missing --timeout 10"
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = ["slow: marks tests as slow and should use longer timeout"]
 
 [tool.vulture]
 paths = ["tests", "src"]

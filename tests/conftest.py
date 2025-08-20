@@ -1,13 +1,22 @@
+from collections.abc import Iterable
 from os import environ
 from pathlib import Path
 
 import pytest
+from pytest import Item
 from pytest_asyncio import fixture
 
 from zero.resources.loader import ResourceLoader
 
 parametrize = pytest.mark.parametrize
 xfail = pytest.mark.xfail
+SLOW_TEST_TIMEOUT_SECONDS = 30
+
+
+def pytest_collection_modifyitems(items: Iterable[Item]) -> None:
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(pytest.mark.timeout(SLOW_TEST_TIMEOUT_SECONDS))
 
 
 @fixture(scope="session", autouse=True)

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import PyInstaller.__main__
+import pytest
 
 
 @dataclass(frozen=True)
@@ -12,6 +13,7 @@ class BuildArtifacts:
     bin_path: Path
 
 
+@pytest.mark.slow
 def test_pyinstaller(project_root: Path) -> None:
     artifacts = build(project_root)
     assert artifacts.bin_path.is_file()
