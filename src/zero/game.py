@@ -65,6 +65,7 @@ class Game:
         assert not self._window_surface, "Not supposed to be initialized yet!"
         self._window_surface = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
         pygame.display.set_caption("Automated Test Window")
+        self.assert_resizeable()
 
     async def game_loop_until_quit(self) -> None:
         assert self._fps > 0
@@ -114,7 +115,6 @@ class Game:
         try:
             pygame.init()
             await self.setup_display()
-            self.assert_resizeable()
             await self.setup_mouse_cursor()
             await self.game_loop_until_quit()
         finally:

@@ -2,6 +2,7 @@
   <configuration default="false" name="pre-commit" type="UvRunConfigurationType" factoryName="UvRunConfigurationType">
     <option name="args">
       <list>
+        <option value="run" />
         <option value="--all-files" />
       </list>
     </option>

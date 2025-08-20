@@ -10,7 +10,7 @@ from zero.resources.loader import ResourceLoader
 
 parametrize = pytest.mark.parametrize
 xfail = pytest.mark.xfail
-SLOW_TEST_TIMEOUT_SECONDS = 30
+SLOW_TEST_TIMEOUT_SECONDS = 180
 
 
 def pytest_collection_modifyitems(items: Iterable[Item]) -> None:

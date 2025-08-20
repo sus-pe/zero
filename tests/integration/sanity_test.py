@@ -1,9 +1,5 @@
-import logging
-
-import zero
-
-logger = logging.getLogger(__name__)
+from zero import __main__
 
 
-def test_sanity() -> None:
-    logger.info(zero)
+async def test_sanity() -> None:
+    await __main__.async_main(send_quit=True)

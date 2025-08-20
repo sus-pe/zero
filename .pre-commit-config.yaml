@@ -104,9 +104,9 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-commit]
-      - id: test
-        name: Test and Assert Coverage
-        entry: uv run pytest
+      - id: cargo-taplo
+        name: Assert cargo and taplo installed
+        entry: uv run pytest -k cargo_test --no-cov
         language: system
         pass_filenames: false
         always_run: true
@@ -126,6 +126,13 @@ repos:
       - id: uv-build
         name: Build python distributables
         entry: uv build
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+      - id: test
+        name: Test and Assert Coverage
+        entry: uv run pytest
         language: system
         pass_filenames: false
         always_run: true
