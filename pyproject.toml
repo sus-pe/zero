@@ -5,7 +5,7 @@ description = ""
 authors = [{ name = "suspe", email = "davidp.info1@gmail.com" }]
 requires-python = ">=3.12,<4.0"
 readme = "README.md"
-dependencies = ["numpy>=2.3.2", "pygame-ce>=2.5.5"]
+dependencies = ["numpy>=2.3.2", "pygame-ce>=2.5.5", "typer>=0.16.1"]
 
 [dependency-groups]
 git = ["pre-commit>=4.2.0,<5", "commitizen>=4.8.3,<5"]
@@ -20,7 +20,6 @@ test = [
     "pytest>=8.4.1,<9",
     "pytest-cov>=6.2.1,<7",
     "pytest-asyncio>=1.1.0",
-    "pytest-profiling>=1.8.1",
     "pytest-timeout>=2.4.0",
 ]
 pycharm = ["setuptools==80.6.0"]
@@ -46,14 +45,26 @@ include = ["src/zero"]
 [tool.hatch.build.targets.wheel.sources]
 "src/zero" = "zero"
 
+[tool.hatch.build]
+include = [
+    "src/zero/resources/**/*", # ensure all non python assests included.
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
-addopts = "--cov src --cov tests --cov-fail-under=100 --cov-report term-missing --timeout 10"
+addopts = [
+    "--cov=src",
+    "--cov=tests",
+    "--cov-fail-under=100",
+    "--cov-report=term-missing",
+    "--timeout=10",
+]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = ["slow: marks tests as slow and should use longer timeout"]
 
 [tool.vulture]
 paths = ["tests", "src"]

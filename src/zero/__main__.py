@@ -1,14 +1,21 @@
 import asyncio
-import sys
+
+import typer
 
 from zero.game import Game
 
 
-async def main() -> int:  # pragma: no cover
+async def async_main(*, send_quit: bool = False) -> int:
     async with Game() as game:
+        if send_quit:
+            await game.send_quit()
         await game.wait_exit()
     return 0
 
 
+def main(*, send_quit: bool = False) -> int:  # pragma: no cover
+    return asyncio.run(async_main(send_quit=send_quit))
+
+
 if __name__ == "__main__":  # pragma: no cover
-    sys.exit(asyncio.run(main()))
+    typer.run(main)

@@ -51,6 +51,8 @@ jobs:
           path: |
             .venv
             ${{ env.PRE_COMMIT_HOME }}
+            dist
+            build
           key: ${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock', '.pre-commit-config.yaml') }}
       - name: "Run uv sync"
         run: uv sync --locked

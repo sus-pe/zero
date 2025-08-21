@@ -1,12 +1,22 @@
+from collections.abc import Iterable
 from os import environ
+from pathlib import Path
 
 import pytest
+from pytest import Item
 from pytest_asyncio import fixture
 
 from zero.resources.loader import ResourceLoader
 
 parametrize = pytest.mark.parametrize
 xfail = pytest.mark.xfail
+SLOW_TEST_TIMEOUT_SECONDS = 180
+
+
+def pytest_collection_modifyitems(items: Iterable[Item]) -> None:
+    for item in items:
+        if "slow" in item.keywords:
+            item.add_marker(pytest.mark.timeout(SLOW_TEST_TIMEOUT_SECONDS))
 
 
 @fixture(scope="session", autouse=True)
@@ -18,3 +28,8 @@ async def sdl_headless_env() -> None:
 @fixture
 async def resource_loader() -> ResourceLoader:
     return ResourceLoader()
+
+
+@fixture(scope="session")
+async def project_root() -> Path:
+    return Path(__file__).parent.parent.resolve()

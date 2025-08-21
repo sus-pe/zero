@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from functools import cached_property
-from pathlib import Path
+from functools import cached_property, lru_cache
+from importlib.resources import files
+from importlib.resources.abc import Traversable
+from io import BytesIO
 from typing import cast
 
 import numpy as np
@@ -10,8 +12,6 @@ from pygame import Rect, Surface
 
 from zero.type_wrappers.arithmetic import Bit, NonNegInt
 from zero.type_wrappers.window import WindowXY
-
-CURSOR_PATH = Path(__file__).parent.joinpath("cursor.png")
 
 
 @dataclass(frozen=True)
@@ -84,9 +84,14 @@ class Sprite:
         target.blit(self._surface, xy)
 
     @classmethod
-    def _load_surface(cls, path: Path) -> Surface:
-        assert path.is_file()
-        return pygame.image.load(path)
+    def _load_surface(cls, asset: Traversable) -> Surface:
+        assert asset.is_file(), f"Provided {asset=} could not be found!"
+        return cls._load_surface_from_bytes(asset.read_bytes(), asset.name)
+
+    @classmethod
+    @lru_cache
+    def _load_surface_from_bytes(cls, raw: bytes, name: str) -> Surface:
+        return pygame.image.load(BytesIO(raw), name)
 
     @classmethod
     def from_surface(cls, surface: Surface) -> "Sprite":
@@ -96,8 +101,9 @@ class Sprite:
 @dataclass(frozen=True)
 class MouseCursorSprite(Sprite):
     @classmethod
-    def load(cls, path: Path = CURSOR_PATH) -> "MouseCursorSprite":
-        return cls.from_surface(cls._load_surface(path))
+    def load(cls) -> "MouseCursorSprite":
+        asset = files(__package__).joinpath("cursor.png")
+        return cls.from_surface(cls._load_surface(asset))
 
     @classmethod
     def from_surface(cls, surface: Surface) -> "MouseCursorSprite":

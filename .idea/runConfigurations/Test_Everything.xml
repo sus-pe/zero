@@ -19,8 +19,8 @@
     <method v="2">
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="ruff format" run_configuration_type="UvRunConfigurationType" />
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="ruff linter" run_configuration_type="UvRunConfigurationType" />
-      <option name="RunConfigurationTask" enabled="true" run_configuration_name="mypy" run_configuration_type="UvRunConfigurationType" />
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="type check" run_configuration_type="UvRunConfigurationType" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="mypy" run_configuration_type="UvRunConfigurationType" />
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="vulture" run_configuration_type="UvRunConfigurationType" />
     </method>
   </configuration>

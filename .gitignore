@@ -1,8 +1,10 @@
 *.pyc
 
-.coverage
-/__main__.spec
+.coverage*
+/*.spec
 /build/
 /dist/
 /.venv/
-/zero_windows.spec
+/*.zip
+/.profiles/
+/prof/

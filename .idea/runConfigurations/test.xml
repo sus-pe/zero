@@ -1,17 +1,14 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="pre-commit" type="UvRunConfigurationType" factoryName="UvRunConfigurationType">
+  <configuration default="false" name="test" type="UvRunConfigurationType" factoryName="UvRunConfigurationType">
     <option name="args">
-      <list>
-        <option value="run" />
-        <option value="--all-files" />
-      </list>
+      <list />
     </option>
-    <option name="checkSync" value="false" />
+    <option name="checkSync" value="true" />
     <option name="env">
       <map />
     </option>
     <option name="runType" value="MODULE" />
-    <option name="scriptOrModule" value="pre-commit" />
+    <option name="scriptOrModule" value="pytest" />
     <option name="uvArgs">
       <list />
     </option>
