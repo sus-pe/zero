@@ -1,3 +1,6 @@
+from collections.abc import Generator
+
+
 class Bit(int):
     zero: "Bit"
     one: "Bit"
@@ -6,6 +9,11 @@ class Bit(int):
         if value not in {0, 1}:
             raise NotBitError(value)
         return super().__new__(cls, value)
+
+    @classmethod
+    def alternating(cls, size: int) -> Generator["Bit"]:
+        for i in range(size):
+            yield Bit(i % 2)
 
 
 Bit.zero = Bit(0)

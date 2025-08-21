@@ -29,18 +29,7 @@ def build(project_root: Path) -> BuildArtifacts:
     name = f"zero_{plat}"
     binary_name = f"{name}.exe" if plat == "windows" else name
 
-    PyInstaller.__main__.run(
-        [
-            "--collect-all",
-            "zero",
-            "--noconfirm",
-            "--onedir",
-            "--windowed",
-            "--name",
-            name,
-            "src/zero/__main__.py",
-        ],
-    )
+    pyinstaller(name)
     dist_name = project_root / Path(f"dist/{name}")
     artifacts_root_dir = dist_name
     zip_file = Path(f"{name}.zip")
@@ -48,18 +37,21 @@ def build(project_root: Path) -> BuildArtifacts:
     shutil.make_archive(name, "zip", artifacts_root_dir)
     shutil.rmtree(artifacts_root_dir)
     shutil.move(zip_file, dist_zip)
-
-    PyInstaller.__main__.run(
-        [
-            "--collect-all",
-            "zero",
-            "--noconfirm",
-            "--onefile",
-            "--windowed",
-            "--name",
-            binary_name,
-            "src/zero/__main__.py",
-        ],
-    )
+    pyinstaller(binary_name, one_file=True)
     dist_binary = dist_dir / binary_name
     return BuildArtifacts(dist_zip, dist_binary)
+
+
+def pyinstaller(name: str, *, one_file: bool = False) -> None:
+    args: list[str] = [
+        "--collect-data",
+        "zero",
+        "--noconfirm",
+        "--windowed",
+        "--name",
+        name,
+        "src/zero/__main__.py",
+    ]
+    if one_file:
+        args.append("--onefile")
+    PyInstaller.__main__.run(args)

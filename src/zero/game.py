@@ -187,6 +187,11 @@ class Game:
         assert self._window_surface, "Supposed to be initialized!"
         return self._resource_fetcher.convert_cursor_sprite
 
+    @cached_property
+    def mouse_cursor_pressed_sprite(self) -> MouseCursorSprite:
+        assert self._window_surface, "Supposed to be initialized!"
+        return self._resource_fetcher.convert_pressed_cursor_sprite
+
     def _render_mouse_cursor_at(self, mouse_cursor: MouseCursorXY) -> None:
         assert self._window_surface, "Supposed to be initialized!"
         assert mouse_cursor, "Supposed to be initialized!"
