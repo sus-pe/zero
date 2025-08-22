@@ -1,5 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Test Everything" type="tests" factoryName="py.test">
+    <output_file path="$ProjectDir$/test_everything.log" is_save="true" />
     <module name="zero" />
     <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
@@ -19,9 +20,10 @@
     <method v="2">
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="ruff format" run_configuration_type="UvRunConfigurationType" />
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="ruff linter" run_configuration_type="UvRunConfigurationType" />
-      <option name="RunConfigurationTask" enabled="true" run_configuration_name="type check" run_configuration_type="UvRunConfigurationType" />
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="mypy" run_configuration_type="UvRunConfigurationType" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="type check" run_configuration_type="UvRunConfigurationType" />
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="vulture" run_configuration_type="UvRunConfigurationType" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="pyinstaller" run_configuration_type="UvRunConfigurationType" />
     </method>
   </configuration>
 </component>

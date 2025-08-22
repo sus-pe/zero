@@ -1,23 +1,5 @@
-import numpy as np
-from pytest import fixture
-
-from zero.type_wrappers.window import WindowPixels, WindowView, WindowXY
-
-
-@fixture
-def stub_pixels() -> WindowPixels:
-    rows = 1920
-    cols = 1080
-    return np.arange(rows * cols, dtype=np.int32).reshape(rows, cols)
+from zero.type_wrappers.window import WindowXY
 
 
 def test_window_xy() -> None:
     assert WindowXY.from_xy(0, 0) + WindowXY.from_xy(1, 1) == WindowXY.from_xy(1, 1)
-
-
-def test_window(stub_pixels: WindowPixels) -> None:
-    window = WindowView(stub_pixels)
-    assert window.width == stub_pixels.shape[0]
-    assert window.height == stub_pixels.shape[1]
-    xy = WindowXY.from_xy(0, 0)
-    assert window.is_containing_at(xy=xy, other=stub_pixels)

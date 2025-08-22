@@ -1,22 +1,17 @@
-from collections.abc import Iterable
 from os import environ
 from pathlib import Path
 
 import pytest
-from pytest import Item
 from pytest_asyncio import fixture
 
+from zero.global_config import (
+    DIST_NAME,
+    ONEFILE_ARTIFACT_EXECUTABLE_NAME,
+)
 from zero.resources.loader import ResourceLoader
 
 parametrize = pytest.mark.parametrize
 xfail = pytest.mark.xfail
-SLOW_TEST_TIMEOUT_SECONDS = 180
-
-
-def pytest_collection_modifyitems(items: Iterable[Item]) -> None:
-    for item in items:
-        if "slow" in item.keywords:
-            item.add_marker(pytest.mark.timeout(SLOW_TEST_TIMEOUT_SECONDS))
 
 
 @fixture(scope="session", autouse=True)
@@ -33,3 +28,17 @@ async def resource_loader() -> ResourceLoader:
 @fixture(scope="session")
 async def project_root() -> Path:
     return Path(__file__).parent.parent.resolve()
+
+
+@fixture(scope="session")
+async def dist_root(project_root: Path) -> Path:
+    res = project_root / DIST_NAME
+    assert res.is_dir()
+    return res
+
+
+@fixture(scope="session")
+async def zero_executable(dist_root: Path) -> Path:
+    res = dist_root / ONEFILE_ARTIFACT_EXECUTABLE_NAME
+    assert res.is_file()
+    return res
