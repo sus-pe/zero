@@ -130,13 +130,6 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-commit]
-      - id: pyinstaller
-        name: build pyinstaller binaries
-        entry: uv run PyInstaller -y --clean .pyinstaller/zero.spec
-        language: system
-        pass_filenames: false
-        always_run: true
-        stages: [pre-commit]
       - id: test
         name: Test and Assert Coverage
         entry: uv run pytest

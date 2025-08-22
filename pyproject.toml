@@ -15,7 +15,6 @@ code-style = [
     "ty>=0.0.1a16",
     "vulture>=2.14",
 ]
-build = ["pyinstaller>=6.15.0", "types-pyinstaller>=6.15.0.20250809"]
 test = [
     "pytest>=8.4.1,<9",
     "pytest-cov>=6.2.1,<7",
@@ -24,7 +23,7 @@ test = [
 ]
 
 [tool.uv]
-default-groups = ["git", "code-style", "build", "test"]
+default-groups = ["git", "code-style", "test"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"

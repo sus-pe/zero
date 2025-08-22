@@ -23,7 +23,7 @@
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="mypy" run_configuration_type="UvRunConfigurationType" />
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="type check" run_configuration_type="UvRunConfigurationType" />
       <option name="RunConfigurationTask" enabled="true" run_configuration_name="vulture" run_configuration_type="UvRunConfigurationType" />
-      <option name="RunConfigurationTask" enabled="true" run_configuration_name="pyinstaller" run_configuration_type="UvRunConfigurationType" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="uv build" run_configuration_type="ShConfigurationType" />
     </method>
   </configuration>
 </component>

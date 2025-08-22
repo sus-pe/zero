@@ -4,10 +4,6 @@ from pathlib import Path
 import pytest
 from pytest_asyncio import fixture
 
-from zero.global_config import (
-    DIST_NAME,
-    ONEFILE_ARTIFACT_EXECUTABLE_NAME,
-)
 from zero.resources.loader import ResourceLoader
 
 parametrize = pytest.mark.parametrize
@@ -32,13 +28,17 @@ async def project_root() -> Path:
 
 @fixture(scope="session")
 async def dist_root(project_root: Path) -> Path:
-    res = project_root / DIST_NAME
+    res = project_root / "dist"
     assert res.is_dir()
     return res
 
 
 @fixture(scope="session")
 async def zero_executable(dist_root: Path) -> Path:
-    res = dist_root / ONEFILE_ARTIFACT_EXECUTABLE_NAME
+    matches = list(dist_root.glob("zero-*.whl"))
+    assert matches, f"No zero-*.whl found in {dist_root}!"
+    assert len(matches) == 1, "Supposed to be a single zero-*.whl!"
+    wheel = matches[0]
+    res = dist_root / wheel
     assert res.is_file()
     return res

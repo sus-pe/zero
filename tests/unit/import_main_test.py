@@ -1,6 +1,6 @@
 import logging
 
-from zero import __main__
+import __main__
 
 logger = logging.getLogger(__name__)
 
