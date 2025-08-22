@@ -4,13 +4,14 @@ from pytest_asyncio import fixture
 
 from zero.game import Game
 from zero.mouse import MouseCursorMotion
+from zero.type_wrappers.arithmetic import Bit
 
 
 @fixture
 async def stub_mouse_motions() -> Iterable[MouseCursorMotion]:
     return (
-        MouseCursorMotion.from_xy(x=x, y=y)
-        for x, y in zip(range(10), range(10), strict=True)
+        MouseCursorMotion.from_xy(x=x, y=y, left=left)
+        for x, y, left in zip(range(10), range(10), Bit.alternating(10), strict=True)
     )
 
 
@@ -22,4 +23,7 @@ async def test_mouse_cursor(
         await game.wait_for_next_mouse_motion()
         cursor = game.get_mouse_cursor_xy()
         assert cursor == stub.xy
-        assert game.is_displayed(game.mouse_cursor_sprite, cursor)
+        if not stub.left:
+            assert game.is_displayed(game.mouse_cursor_sprite, cursor)
+        else:
+            assert game.is_displayed(game.mouse_cursor_pressed_sprite, cursor)

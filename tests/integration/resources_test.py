@@ -6,6 +6,5 @@ def test_resources(resource_loader: ResourceLoader) -> None:
     sprite = resource_loader.cursor_sprite
     assert sprite.width
     assert sprite.height
-    assert sprite.as_np is not None
     assert sprite.rect
     assert sprite.rect_at(WindowXY.from_xy(2, 1))

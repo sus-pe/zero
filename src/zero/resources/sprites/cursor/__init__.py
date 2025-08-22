@@ -5,8 +5,6 @@ from importlib.resources.abc import Traversable
 from io import BytesIO
 from typing import cast
 
-import numpy as np
-import numpy.typing as npt
 import pygame
 from pygame import Rect, Surface
 
@@ -17,12 +15,6 @@ from zero.type_wrappers.window import WindowXY
 @dataclass(frozen=True)
 class Sprite:
     _surface: Surface
-
-    @cached_property
-    def as_np(self) -> npt.NDArray[np.int32]:
-        copy = pygame.surfarray.array2d(self._surface)
-        copy.flags.writeable = False
-        return copy
 
     @cached_property
     def width(self) -> NonNegInt:

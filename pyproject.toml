@@ -5,7 +5,7 @@ description = ""
 authors = [{ name = "suspe", email = "davidp.info1@gmail.com" }]
 requires-python = ">=3.12,<4.0"
 readme = "README.md"
-dependencies = ["numpy>=2.3.2", "pygame-ce>=2.5.5", "typer>=0.16.1"]
+dependencies = ["pygame-ce>=2.5.5", "typer-slim>=0.16.1"]
 
 [dependency-groups]
 git = ["pre-commit>=4.2.0,<5", "commitizen>=4.8.3,<5"]
@@ -15,17 +15,15 @@ code-style = [
     "ty>=0.0.1a16",
     "vulture>=2.14",
 ]
-build = ["pyinstaller>=6.15.0", "types-pyinstaller>=6.15.0.20250809"]
 test = [
     "pytest>=8.4.1,<9",
     "pytest-cov>=6.2.1,<7",
     "pytest-asyncio>=1.1.0",
     "pytest-timeout>=2.4.0",
 ]
-pycharm = ["setuptools==80.6.0"]
 
 [tool.uv]
-default-groups = ["git", "code-style", "build", "test", "pycharm"]
+default-groups = ["git", "code-style", "test"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -35,6 +33,9 @@ version_provider = "uv"
 update_changelog_on_bump = true
 major_version_zero = true
 
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
 include = ["src/zero"]
@@ -49,10 +50,6 @@ include = ["src/zero"]
 include = [
     "src/zero/resources/**/*", # ensure all non python assests included.
 ]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 addopts = [

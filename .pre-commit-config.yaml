@@ -105,26 +105,26 @@ repos:
         always_run: true
         stages: [pre-commit]
       - id: cargo-taplo
-        name: Assert cargo and taplo installed
+        name: assert cargo and taplo installed
         entry: uv run pytest -k cargo_test --no-cov
         language: system
         pass_filenames: false
         always_run: true
         stages: [pre-commit]
       - id: taplo-fmt
-        name: Taplo format
+        name: taplo format
         entry: taplo fmt
         language: system
         types: [toml]
         stages: [pre-commit]
       - id: taplo-lint
-        name: Taplo lint
+        name: taplo lint
         entry: taplo lint
         language: system
         types: [toml]
         stages: [pre-commit]
       - id: uv-build
-        name: Build python distributables
+        name: build python distributables
         entry: uv build
         language: system
         pass_filenames: false
