@@ -51,8 +51,6 @@ jobs:
           path: |
             .venv
             ${{ env.PRE_COMMIT_HOME }}
-            dist
-            build
           key: ${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock', '.pre-commit-config.yaml') }}
       - name: "Run uv sync"
         run: uv sync --locked
@@ -60,11 +58,14 @@ jobs:
         env:
           SKIP: no-commit-to-branch
         run: uv run pre-commit run --all-files
-      - name: "Upload artifacts"
+      - name: "DEBUG: list artifacts"
+        run: ls dist
+      - name: "Upload sdist/bdist artifacts"
+        if: ${{ runner.os == 'Linux' }} # Must prevent multiple runs or release fails on collisions
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-dist
-          path: ${{ runner.os == 'Linux' && 'dist/*' || 'dist/zero_*' }}
+          path: 'dist/*'
           if-no-files-found: error
   release:
     needs: build
