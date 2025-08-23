@@ -49,6 +49,7 @@ class Game:
             self.start_game(),
         )
         await self._is_started_event.wait()
+        await self._loop_event.wait()
         return self
 
     async def __aexit__(
@@ -71,9 +72,10 @@ class Game:
     async def setup_display(self) -> None:
         assert not self._window_surface, "Not supposed to be initialized yet!"
         self._window_surface = pygame.display.set_mode(
-            self._resolution, pygame.RESIZABLE
+            self._resolution, pygame.RESIZABLE | pygame.SCALED
         )
         pygame.display.set_caption("Automated Test Window")
+        self._fill_window_with_black()
         self.assert_resizeable()
 
     async def game_loop_until_quit(self) -> None:
@@ -84,7 +86,7 @@ class Game:
         running = True
         clock: Clock = pygame.time.Clock()
         while running:
-            self._window_surface.fill((0, 0, 0))
+            self._fill_window_with_black()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -93,7 +95,8 @@ class Game:
                         cast(PygameMouseMotionEventDict, event.dict)
                     )
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
-                    self.set_fullscreen()
+                    # TODO: PUBSUB!
+                    self.toggle_fullscreen()
 
             self._render_mouse_cursor()
             pygame.display.flip()
@@ -146,6 +149,7 @@ class Game:
         with suppress(pygame.error):
             await self.send_quit()
 
+    # TODO: DELETE ME!!!
     def assert_get_display_surface(self) -> Surface:
         surface: Surface | None = pygame.display.get_surface()
         assert surface
@@ -252,5 +256,23 @@ class Game:
             new_flags |= pygame.FULLSCREEN | pygame.SCALED
             self._window_surface = pygame.display.set_mode(self._resolution, new_flags)
 
+    def set_windowed(self) -> None:
+        assert self._window_surface, "Supposed to be initialized!"
+        if not self.is_windowed():
+            flags = self._window_surface.get_flags()
+            new_flags = flags & ~pygame.FULLSCREEN
+            new_flags |= pygame.RESIZABLE
+            self._window_surface = pygame.display.set_mode(self._resolution, new_flags)
+
     def send_f11(self) -> None:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_F11}))
+
+    def toggle_fullscreen(self) -> None:
+        if self.is_fullscreen():
+            self.set_windowed()
+        else:
+            self.set_fullscreen()
+
+    def _fill_window_with_black(self) -> None:
+        assert self._window_surface, "Supposed to be initialized!"
+        self._window_surface.fill((0, 0, 0))
