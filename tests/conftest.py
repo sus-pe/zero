@@ -1,10 +1,13 @@
+from collections.abc import Iterable
 from os import environ
 from pathlib import Path
 
 import pytest
 from pytest_asyncio import fixture
 
+from zero.mouse import MouseCursorEvent
 from zero.resources.loader import ResourceLoader
+from zero.type_wrappers.arithmetic import Bit
 
 parametrize = pytest.mark.parametrize
 xfail = pytest.mark.xfail
@@ -42,3 +45,18 @@ async def zero_executable(dist_root: Path) -> Path:
     res = dist_root / wheel
     assert res.is_file()
     return res
+
+
+@fixture
+async def stub_mouse_events() -> Iterable[MouseCursorEvent]:
+    return (
+        MouseCursorEvent.from_xy(x=x, y=y, left=left, middle=middle, right=right)
+        for x, y, left, middle, right in zip(
+            range(10),
+            range(10),
+            Bit.alternating(10),
+            Bit.alternating(10),
+            Bit.alternating(10),
+            strict=True,
+        )
+    )

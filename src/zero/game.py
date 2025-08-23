@@ -9,9 +9,14 @@ import pygame
 from pygame import Clock, Surface
 
 from zero.contextmanagers import CONTEXT_MANAGER_EXIT_DO_NOT_SUPPRESS_EXCEPTION
-from zero.mouse import MouseCursorMotion, MouseCursorXY
+from zero.mouse import Mouse, MouseCursorEvent
 from zero.resources.loader import ResourceLoader
-from zero.resources.sprites.cursor import MouseCursorSprite, Sprite
+from zero.resources.sprites.cursor import (
+    MouseCursorSprite,
+    PressedMouseCursorSprite,
+    Sprite,
+)
+from zero.type_wrappers.arithmetic import NonNegInt
 from zero.type_wrappers.typed_dict import PygameMouseMotionEventDict
 from zero.type_wrappers.window import WindowXY
 
@@ -24,15 +29,17 @@ class Game:
     def __init__(self) -> None:
         self._resource_fetcher = ResourceLoader()
         self._window_surface: Surface | None = None
-        self._mouse_cursor: MouseCursorXY | None = None
+        self._mouse: Mouse | None = None
         self._next_mouse_motion_subscribers: Queue[
-            Future[MouseCursorMotion] | Queue[MouseCursorMotion]
+            Future[MouseCursorEvent] | Queue[MouseCursorEvent]
         ] = Queue()
         self._is_started_event: Event = Event()
         self._is_quit_event: Event = Event()
         self._is_aexit_event: Event = Event()
+        self._loop_event: Event = Event()
         self._window_task: Task[None] | None = None
-        self._fps: int = 240
+        self._fps: NonNegInt = NonNegInt(240)
+        self._resolution = (NonNegInt(640), NonNegInt(480))
         self._cursor_controller: CursorController | None = None
 
     async def __aenter__(self) -> "Game":
@@ -63,14 +70,16 @@ class Game:
 
     async def setup_display(self) -> None:
         assert not self._window_surface, "Not supposed to be initialized yet!"
-        self._window_surface = pygame.display.set_mode((640, 480), pygame.RESIZABLE)
+        self._window_surface = pygame.display.set_mode(
+            self._resolution, pygame.RESIZABLE
+        )
         pygame.display.set_caption("Automated Test Window")
         self.assert_resizeable()
 
     async def game_loop_until_quit(self) -> None:
         assert self._fps > 0
         assert self._window_surface, "Supposed to be initialized!"
-        assert self._mouse_cursor, "Supposed to be initialized!"
+        assert self._mouse, "Supposed to be initialized!"
 
         running = True
         clock: Clock = pygame.time.Clock()
@@ -83,19 +92,28 @@ class Game:
                     await self.publish_mouse_motion_event(
                         cast(PygameMouseMotionEventDict, event.dict)
                     )
+                elif event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
+                    self.set_fullscreen()
 
-            self._render_mouse_cursor_at(self._mouse_cursor)
+            self._render_mouse_cursor()
             pygame.display.flip()
 
             # yield event loop
             await sleep(0)
+            self._loop_event.set()
             clock.tick(self._fps)
+            self._loop_event.clear()
+
+    async def wait_next_loop(self) -> None:
+        assert self._is_started_event.is_set()
+        assert not self._is_quit_event.is_set()
+        await self._loop_event.wait()
 
     async def publish_mouse_motion_event(
         self, mouse_motion_event: PygameMouseMotionEventDict
     ) -> None:
-        mouse_motion = MouseCursorMotion.from_pygame(mouse_motion_event)
-        requeue_subs: list[Queue[MouseCursorMotion]] = []
+        mouse_motion = MouseCursorEvent.from_pygame(mouse_motion_event)
+        requeue_subs: list[Queue[MouseCursorEvent]] = []
         while not self._next_mouse_motion_subscribers.empty():
             sub = self._next_mouse_motion_subscribers.get_nowait()
             if isinstance(sub, Future):
@@ -142,45 +160,44 @@ class Game:
     def get_display_flags(self) -> int:
         return self.assert_get_display_surface().get_flags()
 
-    async def wait_for_next_mouse_motion(self) -> MouseCursorMotion:
-        f: Future[MouseCursorMotion] = Future()
+    async def wait_for_next_mouse_motion(self) -> MouseCursorEvent:
+        f: Future[MouseCursorEvent] = Future()
         await self._notify_next_mouse_motion(f)
         return await f
 
-    async def _notify_next_mouse_motion(self, f: Future[MouseCursorMotion]) -> None:
+    async def _notify_next_mouse_motion(self, f: Future[MouseCursorEvent]) -> None:
         await self._next_mouse_motion_subscribers.put(f)
 
-    def send_mouse_motion(self, expected_mouse: MouseCursorMotion) -> None:
+    def send_mouse_motion(self, expected_mouse: MouseCursorEvent) -> None:
         pygame.event.post(expected_mouse.as_pygame_event())
 
-    def get_mouse_cursor_xy(self) -> MouseCursorXY:
-        assert self._mouse_cursor, "Supposed to be initialized"
-        return self._mouse_cursor
+    def get_mouse_cursor_xy(self) -> WindowXY:
+        assert self._mouse, "Supposed to be initialized"
+        return self._mouse.cursor_xy
 
     async def setup_mouse_cursor(self) -> None:
-        assert not self._mouse_cursor, "Not supposed to be initiazlied yet."
+        assert not self._mouse, "Not supposed to be initiazlied yet."
+        assert self.is_os_cursor_visible()
+        self.hide_os_cursor()
+        assert self.is_os_cursor_hidden()
         cursor_events_queue = await self._start_cursor_controller()
-        self._mouse_cursor = MouseCursorXY.zero_origin()
+        self._mouse = Mouse()
         await self._next_mouse_motion_subscribers.put(cursor_events_queue)
-        await self._load_cursor_img()
 
-    async def _start_cursor_controller(self) -> Queue[MouseCursorMotion]:
-        event_queue: Queue[MouseCursorMotion] = Queue()
+    async def _start_cursor_controller(self) -> Queue[MouseCursorEvent]:
+        event_queue: Queue[MouseCursorEvent] = Queue()
         self._cursor_controller = create_task(
             self._cursor_controller_coroutine(event_queue)
         )
         return event_queue
 
     async def _cursor_controller_coroutine(
-        self, events: Queue[MouseCursorMotion]
+        self, events: Queue[MouseCursorEvent]
     ) -> None:
         while not self._is_quit_event.is_set():
-            motion = await events.get()
-            self._mouse_cursor = motion.cursor
-            self._render_mouse_cursor_at(self._mouse_cursor)
-
-    async def _load_cursor_img(self) -> None:
-        pass
+            event = await events.get()
+            assert self._mouse, "Supposed to be initialized!"
+            self._mouse.update(event)
 
     @cached_property
     def mouse_cursor_sprite(self) -> MouseCursorSprite:
@@ -188,16 +205,52 @@ class Game:
         return self._resource_fetcher.convert_cursor_sprite
 
     @cached_property
-    def mouse_cursor_pressed_sprite(self) -> MouseCursorSprite:
+    def mouse_cursor_pressed_sprite(self) -> PressedMouseCursorSprite:
         assert self._window_surface, "Supposed to be initialized!"
         return self._resource_fetcher.convert_pressed_cursor_sprite
 
-    def _render_mouse_cursor_at(self, mouse_cursor: MouseCursorXY) -> None:
+    def _render_mouse_cursor(self) -> None:
         assert self._window_surface, "Supposed to be initialized!"
-        assert mouse_cursor, "Supposed to be initialized!"
-        self.mouse_cursor_sprite.blit_to(self._window_surface, mouse_cursor)
+        assert self._mouse, "Supposed to be initialized!"
+        if self._mouse.left:
+            sprite: Sprite = self.mouse_cursor_pressed_sprite
+        else:
+            sprite = self.mouse_cursor_sprite
+
+        sprite.blit_to(self._window_surface, self._mouse.cursor_xy)
 
     def is_displayed(self, sprite: Sprite, xy: WindowXY) -> bool:
         assert self._window_surface, "Supposed to be initialized!"
         display_rect = self._window_surface.subsurface(sprite.rect_at(xy))
         return sprite.is_displayed_by(display_rect)
+
+    def is_os_cursor_visible(self) -> bool:
+        return pygame.mouse.get_visible()
+
+    def is_os_cursor_hidden(self) -> bool:
+        return not self.is_os_cursor_visible()
+
+    def hide_os_cursor(self) -> None:
+        pygame.mouse.set_visible(False)
+
+    def is_fullscreen(self) -> bool:
+        assert self._window_surface, "Supposed to be initialized!"
+        return bool(self._window_surface.get_flags() & pygame.FULLSCREEN)
+
+    def is_windowed(self) -> bool:
+        return not self.is_fullscreen()
+
+    def set_fullscreen(self) -> None:
+        assert self._window_surface, "Supposed to be initialized!"
+        if not self.is_fullscreen():
+            flags = self._window_surface.get_flags()
+            new_flags = flags
+
+            if self.is_display_resizeable():
+                new_flags = flags & ~pygame.RESIZABLE
+
+            new_flags |= pygame.FULLSCREEN | pygame.SCALED
+            self._window_surface = pygame.display.set_mode(self._resolution, new_flags)
+
+    def send_f11(self) -> None:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_F11}))
