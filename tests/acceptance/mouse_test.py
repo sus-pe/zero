@@ -1,26 +1,17 @@
 from collections.abc import Iterable
 
-from pytest_asyncio import fixture
-
 from zero.game import Game
-from zero.mouse import MouseCursorMotion
-from zero.type_wrappers.arithmetic import Bit
-
-
-@fixture
-async def stub_mouse_motions() -> Iterable[MouseCursorMotion]:
-    return (
-        MouseCursorMotion.from_xy(x=x, y=y, left=left)
-        for x, y, left in zip(range(10), range(10), Bit.alternating(10), strict=True)
-    )
+from zero.mouse import MouseCursorEvent
 
 
 async def test_mouse_cursor(
-    game: Game, stub_mouse_motions: Iterable[MouseCursorMotion]
+    game: Game, stub_mouse_events: Iterable[MouseCursorEvent]
 ) -> None:
-    for stub in stub_mouse_motions:
+    assert game.is_os_cursor_hidden()
+    for stub in stub_mouse_events:
         game.send_mouse_motion(stub)
         await game.wait_for_next_mouse_motion()
+        await game.wait_next_loop()
         cursor = game.get_mouse_cursor_xy()
         assert cursor == stub.xy
         if not stub.left:
