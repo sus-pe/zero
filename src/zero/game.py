@@ -149,12 +149,6 @@ class Game:
         with suppress(pygame.error):
             await self.send_quit()
 
-    # TODO: DELETE ME!!!
-    def assert_get_display_surface(self) -> Surface:
-        surface: Surface | None = pygame.display.get_surface()
-        assert surface
-        return surface
-
     def assert_resizeable(self) -> None:
         assert self.is_display_resizeable()
 
@@ -162,7 +156,8 @@ class Game:
         return bool(self.get_display_flags() & pygame.RESIZABLE)
 
     def get_display_flags(self) -> int:
-        return self.assert_get_display_surface().get_flags()
+        assert self._window_surface, "Supposed to be initialized!"
+        return self._window_surface.get_flags()
 
     async def wait_for_next_mouse_motion(self) -> MouseCursorEvent:
         f: Future[MouseCursorEvent] = Future()
