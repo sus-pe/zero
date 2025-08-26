@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import AsyncGenerator, Generator, Iterable
 from os import environ
 from pathlib import Path
 
@@ -9,6 +9,9 @@ from zero.mouse import MouseCursorEvent
 from zero.resources.loader import ResourceLoader
 from zero.type_wrappers.arithmetic import Bit
 
+type Fixture[T] = Generator[T, None, None]
+type AsyncFixture[T] = AsyncGenerator[T, None]
+
 parametrize = pytest.mark.parametrize
 xfail = pytest.mark.xfail
 
@@ -18,7 +21,6 @@ async def sdl_headless_env() -> None:
     # Must be set before pygame.init()
     environ.setdefault("SDL_VIDEODRIVER", "dummy")
     environ.setdefault("SDL_AUDIODRIVER", "dummy")
-    environ.setdefault("SDL_RENDER_DRIVER", "software")
 
 
 @fixture

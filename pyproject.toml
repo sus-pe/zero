@@ -58,6 +58,7 @@ addopts = [
     "--cov-fail-under=100",
     "--cov-report=term-missing",
     "--timeout=10",
+    "-W error",
 ]
 asyncio_mode = "auto"
 testpaths = ["tests"]

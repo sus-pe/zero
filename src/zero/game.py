@@ -33,7 +33,7 @@ class Game:
         ] = Queue()
         self._window_task: Task[None] | None = None
         self._fps: NonNegInt = NonNegInt(240)
-        self._resolution = (NonNegInt(640), NonNegInt(480))
+        self._resolution = (NonNegInt(1280), NonNegInt(720))
         self._cursor_controller: CursorController | None = None
         self._loop_event: Event = Event()
         self._is_loop_finished_event: Event = Event()
@@ -42,14 +42,11 @@ class Game:
     async def wait_exit(self) -> None:
         await self._is_loop_finished_event.wait()
 
-    async def setup_display(self) -> None:
+    async def setup_display(self, flags: int) -> None:
         assert not self._window_surface, "Not supposed to be initialized yet!"
-        self._window_surface = pygame.display.set_mode(
-            self._resolution, pygame.RESIZABLE | pygame.SCALED
-        )
+        self._window_surface = pygame.display.set_mode(self._resolution, flags)
         pygame.display.set_caption("Automated Test Window")
         self._fill_window_with_black()
-        self.assert_resizeable()
 
     async def game_loop_until_quit(self) -> None:
         assert self._fps > 0
@@ -122,16 +119,6 @@ class Game:
     async def try_send_quit(self) -> None:
         with suppress(pygame.error):
             await self.send_quit()
-
-    def assert_resizeable(self) -> None:
-        assert self.is_display_resizeable()
-
-    def is_display_resizeable(self) -> bool:
-        return bool(self.get_display_flags() & pygame.RESIZABLE)
-
-    def get_display_flags(self) -> int:
-        assert self._window_surface, "Supposed to be initialized!"
-        return self._window_surface.get_flags()
 
     async def wait_for_next_mouse_motion(self) -> MouseCursorEvent:
         f: Future[MouseCursorEvent] = Future()
@@ -216,13 +203,7 @@ class Game:
     def set_fullscreen(self) -> None:
         assert self._window_surface, "Supposed to be initialized!"
         if not self.is_fullscreen():
-            flags = self._window_surface.get_flags()
-            new_flags = flags
-
-            if self.is_display_resizeable():
-                new_flags = flags & ~pygame.RESIZABLE
-
-            new_flags |= pygame.FULLSCREEN | pygame.SCALED
+            new_flags = self._window_surface.get_flags() | pygame.FULLSCREEN
             self._window_surface = pygame.display.set_mode(self._resolution, new_flags)
 
     def set_windowed(self) -> None:
@@ -230,7 +211,6 @@ class Game:
         if not self.is_windowed():
             flags = self._window_surface.get_flags()
             new_flags = flags & ~pygame.FULLSCREEN
-            new_flags |= pygame.RESIZABLE
             self._window_surface = pygame.display.set_mode(self._resolution, new_flags)
 
     def send_f11(self) -> None:
