@@ -2,11 +2,11 @@ import asyncio
 
 import typer
 
-from zero.game import Game
+from zero.game_loader import GameLoader
 
 
 async def async_main(*, send_quit: bool = False) -> int:
-    async with Game() as game:
+    async with GameLoader() as game:
         if send_quit:
             await game.send_quit()
         await game.wait_exit()
