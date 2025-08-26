@@ -24,14 +24,14 @@ CursorController = Task[None]
 
 
 class Game:
-    def __init__(self, resource_loader: ResourceLoader) -> None:
+    def __init__(self, resource_loader: ResourceLoader, fps: NonNegInt) -> None:
         self._resource_loader = resource_loader
         self._window_surface: Surface | None = None
         self._mouse: Mouse | None = None
         self._next_mouse_motion_subscribers: Queue[
             Future[MouseCursorEvent] | Queue[MouseCursorEvent]
         ] = Queue()
-        self._fps: NonNegInt = NonNegInt(240)
+        self._fps = fps
         self._resolution = (NonNegInt(1280), NonNegInt(720))
         self._cursor_controller: CursorController | None = None
         self._loop_event: Event = Event()

@@ -6,6 +6,7 @@ import pygame
 from zero.contextmanagers import CONTEXT_MANAGER_EXIT_DO_NOT_SUPPRESS_EXCEPTION
 from zero.game import Game
 from zero.resources.loader import ResourceLoader
+from zero.type_wrappers.arithmetic import NonNegInt
 
 
 class GameLoader:
@@ -18,7 +19,7 @@ class GameLoader:
 
     async def __aenter__(self) -> Game:
         assert not self._is_started_event.is_set()
-        self._game = Game(resource_loader=ResourceLoader())
+        self._game = Game(resource_loader=ResourceLoader(), fps=NonNegInt(240))
         self._is_started_event.set()
         pygame.init()
         await self._game.setup_display(flags=self._display_flags)
