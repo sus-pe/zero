@@ -9,5 +9,6 @@ from zero.game_loader import GameLoader
 
 @fixture
 async def game() -> AsyncGenerator[Game, Any]:
-    async with GameLoader() as game:
+    # Scaled disabled to avoid "no-fast-render" errors.
+    async with GameLoader(resizeable=False, scaled=False) as game:
         yield game
