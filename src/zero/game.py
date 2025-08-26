@@ -31,7 +31,6 @@ class Game:
         self._next_mouse_motion_subscribers: Queue[
             Future[MouseCursorEvent] | Queue[MouseCursorEvent]
         ] = Queue()
-        self._window_task: Task[None] | None = None
         self._fps: NonNegInt = NonNegInt(240)
         self._resolution = (NonNegInt(1280), NonNegInt(720))
         self._cursor_controller: CursorController | None = None
