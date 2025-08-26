@@ -2,13 +2,11 @@ import logging
 from asyncio import Event, Future, Queue, Task, create_task, sleep
 from contextlib import suppress
 from functools import cached_property
-from types import TracebackType
 from typing import cast
 
 import pygame
 from pygame import Clock, Surface
 
-from zero.contextmanagers import CONTEXT_MANAGER_EXIT_DO_NOT_SUPPRESS_EXCEPTION
 from zero.mouse import Mouse, MouseCursorEvent
 from zero.resources.loader import ResourceLoader
 from zero.resources.sprites.cursor import (
@@ -33,41 +31,16 @@ class Game:
         self._next_mouse_motion_subscribers: Queue[
             Future[MouseCursorEvent] | Queue[MouseCursorEvent]
         ] = Queue()
-        self._is_started_event: Event = Event()
-        self._is_quit_event: Event = Event()
-        self._is_aexit_event: Event = Event()
-        self._loop_event: Event = Event()
         self._window_task: Task[None] | None = None
         self._fps: NonNegInt = NonNegInt(240)
         self._resolution = (NonNegInt(640), NonNegInt(480))
         self._cursor_controller: CursorController | None = None
-
-    async def __aenter__(self) -> "Game":
-        assert not self._is_started_event.is_set()
-        assert not self._is_quit_event.is_set()
-        self._window_task = create_task(
-            self.start_game(),
-        )
-        await self._is_started_event.wait()
-        await self._loop_event.wait()
-        return self
-
-    async def __aexit__(
-        self,
-        _exc_type: type[BaseException] | None,
-        _exc_val: BaseException | None,
-        _exc_tb: TracebackType | None,
-    ) -> bool | None:
-        assert self._is_started_event.is_set()
-        await self.try_send_quit()
-        await self.wait_exit()
-        assert self._is_quit_event.is_set()
-        assert self._window_task, "Supposed to be initialized"
-        await self._window_task
-        return CONTEXT_MANAGER_EXIT_DO_NOT_SUPPRESS_EXCEPTION
+        self._loop_event: Event = Event()
+        self._is_loop_finished_event: Event = Event()
+        self._is_loop_started_event: Event = Event()
 
     async def wait_exit(self) -> None:
-        await self._is_quit_event.wait()
+        await self._is_loop_finished_event.wait()
 
     async def setup_display(self) -> None:
         assert not self._window_surface, "Not supposed to be initialized yet!"
@@ -82,34 +55,49 @@ class Game:
         assert self._fps > 0
         assert self._window_surface, "Supposed to be initialized!"
         assert self._mouse, "Supposed to be initialized!"
+        assert not self._is_loop_finished_event.is_set()
+        assert not self._is_loop_started_event.is_set()
 
+        self._is_loop_started_event.set()
         running = True
         clock: Clock = pygame.time.Clock()
-        while running:
-            self._fill_window_with_black()
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.MOUSEMOTION:
-                    await self.publish_mouse_motion_event(
-                        cast(PygameMouseMotionEventDict, event.dict)
-                    )
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
-                    # TODO: PUBSUB!
-                    self.toggle_fullscreen()
+        try:
+            while running:
+                is_quit = await self._do_one_loop()
+                running = not is_quit
+                # yield event loop
+                await sleep(0)
+                self._loop_event.set()
+                clock.tick(self._fps)
+                self._loop_event.clear()
+        finally:
+            assert self._is_loop_started_event.is_set()
+            assert not self._is_loop_finished_event.is_set()
+            self._is_loop_finished_event.set()
 
-            self._render_mouse_cursor()
-            pygame.display.flip()
+    async def _do_one_loop(self) -> bool:
+        is_quit: bool = False
+        self._fill_window_with_black()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                is_quit = True
+            elif event.type == pygame.MOUSEMOTION:
+                await self.publish_mouse_motion_event(
+                    cast(PygameMouseMotionEventDict, event.dict)
+                )
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_F11:
+                # TODO: PUBSUB!
+                self.toggle_fullscreen()
+        self._render_mouse_cursor()
+        pygame.display.flip()
+        return is_quit
 
-            # yield event loop
-            await sleep(0)
-            self._loop_event.set()
-            clock.tick(self._fps)
-            self._loop_event.clear()
+    async def wait_loop_started(self) -> None:
+        await self._is_loop_started_event.wait()
 
     async def wait_next_loop(self) -> None:
-        assert self._is_started_event.is_set()
-        assert not self._is_quit_event.is_set()
+        assert self._is_loop_started_event.is_set()
+        assert not self._is_loop_finished_event.is_set()
         await self._loop_event.wait()
 
     async def publish_mouse_motion_event(
@@ -127,20 +115,6 @@ class Game:
 
         for sub in requeue_subs:
             await self._next_mouse_motion_subscribers.put(sub)
-
-    async def start_game(self) -> None:
-        assert not self._is_quit_event.is_set()
-        assert not self._is_started_event.is_set()
-
-        self._is_started_event.set()
-        try:
-            pygame.init()
-            await self.setup_display()
-            await self.setup_mouse_cursor()
-            await self.game_loop_until_quit()
-        finally:
-            self._is_quit_event.set()
-            pygame.quit()
 
     async def send_quit(self) -> None:
         pygame.event.post(pygame.event.Event(pygame.QUIT))
@@ -193,7 +167,7 @@ class Game:
     async def _cursor_controller_coroutine(
         self, events: Queue[MouseCursorEvent]
     ) -> None:
-        while not self._is_quit_event.is_set():
+        while not self._is_loop_finished_event.is_set():
             event = await events.get()
             assert self._mouse, "Supposed to be initialized!"
             self._mouse.update(event)
