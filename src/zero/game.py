@@ -25,7 +25,7 @@ CursorController = Task[None]
 
 class Game:
     def __init__(self) -> None:
-        self._resource_fetcher = ResourceLoader()
+        self._resource_loader = ResourceLoader()
         self._window_surface: Surface | None = None
         self._mouse: Mouse | None = None
         self._next_mouse_motion_subscribers: Queue[
@@ -162,12 +162,12 @@ class Game:
     @cached_property
     def mouse_cursor_sprite(self) -> MouseCursorSprite:
         assert self._window_surface, "Supposed to be initialized!"
-        return self._resource_fetcher.convert_cursor_sprite
+        return self._resource_loader.convert_cursor_sprite
 
     @cached_property
     def mouse_cursor_pressed_sprite(self) -> PressedMouseCursorSprite:
         assert self._window_surface, "Supposed to be initialized!"
-        return self._resource_fetcher.convert_pressed_cursor_sprite
+        return self._resource_loader.convert_pressed_cursor_sprite
 
     def _render_mouse_cursor(self) -> None:
         assert self._window_surface, "Supposed to be initialized!"
