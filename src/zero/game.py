@@ -24,8 +24,8 @@ CursorController = Task[None]
 
 
 class Game:
-    def __init__(self) -> None:
-        self._resource_loader = ResourceLoader()
+    def __init__(self, resource_loader: ResourceLoader) -> None:
+        self._resource_loader = resource_loader
         self._window_surface: Surface | None = None
         self._mouse: Mouse | None = None
         self._next_mouse_motion_subscribers: Queue[
