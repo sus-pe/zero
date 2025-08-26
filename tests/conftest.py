@@ -17,6 +17,8 @@ xfail = pytest.mark.xfail
 async def sdl_headless_env() -> None:
     # Must be set before pygame.init()
     environ.setdefault("SDL_VIDEODRIVER", "dummy")
+    environ.setdefault("SDL_AUDIODRIVER", "dummy")
+    environ.setdefault("SDL_RENDER_DRIVER", "software")
 
 
 @fixture
