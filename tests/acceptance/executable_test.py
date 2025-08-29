@@ -1,36 +1,38 @@
 import sys
 from pathlib import Path
-from subprocess import run
 
-from pytest import CaptureFixture, fixture
+from pytest import fixture
 
-from tests.conftest import Fixture
+from tests.acceptance.conftest import assert_subprocess
 
 
 @fixture
 def test_flags() -> list[str]:
-    return [
-        "--send-quit",  # The game execution should finish after a single loop.
-        "--no-resizeable",  # To deal with "no fast rendered" error
-        "--no-scaled",  # To deal with "no fast rendered" error
-    ]
+    return ["--is-test", "--no-is-scaled"]
 
 
-@fixture(autouse=True)
-def _assert_no_outputs(capfd: CaptureFixture[str]) -> Fixture[None]:
-    yield
-    _, err = capfd.readouterr()
-    assert not err
-
-
-def test_executable(
+async def test_executable(
     zero_executable: Path,
     test_flags: list[str],
 ) -> None:
-    # ruff: noqa: S603
-    run([sys.executable, zero_executable, *test_flags], check=True)
+    test_flags.insert(0, str(zero_executable))
+    await assert_subprocess(sys.executable, test_flags)
 
 
-def test_as_module(test_flags: list[str]) -> None:
-    # ruff: noqa: S603
-    run([sys.executable, "-m", "zero", *test_flags], check=True)
+async def assert_module(flags: list[str]) -> None:
+    await assert_subprocess(
+        sys.executable,
+        flags=["-m", "zero", *flags],
+    )
+
+
+async def test_as_module(test_flags: list[str]) -> None:
+    await assert_module(test_flags)
+
+
+async def test_with_hw_rendered(
+    test_flags: list[str], sdl_hw_videodriver: "str"
+) -> None:
+    assert sdl_hw_videodriver != "dummy"
+    test_flags.append("--is-scaled")
+    await assert_module(test_flags)

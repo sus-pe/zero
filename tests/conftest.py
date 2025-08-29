@@ -1,9 +1,10 @@
+import tracemalloc
 from collections.abc import AsyncGenerator, Generator, Iterable
 from os import environ
 from pathlib import Path
 
 import pytest
-from pytest_asyncio import fixture
+from pytest import fixture
 
 from zero.mouse import MouseCursorEvent
 from zero.resources.loader import ResourceLoader
@@ -14,34 +15,47 @@ type AsyncFixture[T] = AsyncGenerator[T, None]
 
 parametrize = pytest.mark.parametrize
 xfail = pytest.mark.xfail
+raises = pytest.raises
+slow = pytest.mark.slow
+
+
+def pytest_sessionstart() -> None:
+    tracemalloc.start(1000)
 
 
 @fixture(scope="session", autouse=True)
-async def sdl_headless_env() -> None:
+def sdl_headless_env() -> None:
     # Must be set before pygame.init()
     environ.setdefault("SDL_VIDEODRIVER", "dummy")
     environ.setdefault("SDL_AUDIODRIVER", "dummy")
 
 
 @fixture
-async def resource_loader() -> ResourceLoader:
+def sdl_hw_videodriver() -> Fixture[str]:
+    prev = environ.pop("SDL_VIDEODRIVER")
+    yield "auto"
+    environ.setdefault("SDL_VIDEODRIVER", prev)
+
+
+@fixture
+def resource_loader() -> ResourceLoader:
     return ResourceLoader()
 
 
 @fixture(scope="session")
-async def project_root() -> Path:
+def project_root() -> Path:
     return Path(__file__).parent.parent.resolve()
 
 
 @fixture(scope="session")
-async def dist_root(project_root: Path) -> Path:
+def dist_root(project_root: Path) -> Path:
     res = project_root / "dist"
     assert res.is_dir()
     return res
 
 
 @fixture(scope="session")
-async def zero_executable(dist_root: Path) -> Path:
+def zero_executable(dist_root: Path) -> Path:
     matches = list(dist_root.glob("zero-*.whl"))
     assert matches, f"No zero-*.whl found in {dist_root}!"
     assert len(matches) == 1, "Supposed to be a single zero-*.whl!"
@@ -52,7 +66,7 @@ async def zero_executable(dist_root: Path) -> Path:
 
 
 @fixture
-async def stub_mouse_events() -> Iterable[MouseCursorEvent]:
+def stub_mouse_events() -> Iterable[MouseCursorEvent]:
     return (
         MouseCursorEvent.from_xy(x=x, y=y, left=left, middle=middle, right=right)
         for x, y, left, middle, right in zip(
