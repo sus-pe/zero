@@ -1,7 +1,7 @@
 from functools import cached_property
 from typing import cast
 
-from zero.resources.sprites.cursor import MouseCursorSprite
+from zero.resources.sprites.cursor import MouseCursorSprite, PressedMouseCursorSprite
 
 
 class ResourceLoader:
@@ -10,9 +10,13 @@ class ResourceLoader:
         return MouseCursorSprite.load()
 
     @cached_property
+    def pressed_cursor_sprite(self) -> PressedMouseCursorSprite:
+        return PressedMouseCursorSprite.load()
+
+    @cached_property
     def convert_cursor_sprite(self) -> MouseCursorSprite:
         return cast(MouseCursorSprite, self.cursor_sprite.convert())
 
     @cached_property
-    def convert_pressed_cursor_sprite(self) -> MouseCursorSprite:
-        return cast(MouseCursorSprite, self.cursor_sprite.convert())
+    def convert_pressed_cursor_sprite(self) -> PressedMouseCursorSprite:
+        return cast(PressedMouseCursorSprite, self.pressed_cursor_sprite.convert())

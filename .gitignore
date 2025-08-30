@@ -9,3 +9,7 @@
 /.profiles/
 /prof/
 /src/zero.egg-info/
+
+*.log
+
+tests/acceptance/__pycache__/

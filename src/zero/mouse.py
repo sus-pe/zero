@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from functools import cached_property
-from typing import cast
 
 from zero.pygame_event_factory import (
     PygameEventFactory,
     PygameMouseMotionEvent,
 )
 from zero.type_wrappers.arithmetic import (
+    Bit,
     LeftMouseBit,
     MiddleMouseBit,
     RightMouseBit,
@@ -16,19 +16,8 @@ from zero.type_wrappers.window import WindowX, WindowXY, WindowY
 
 
 @dataclass(frozen=True)
-class MouseCursorXY(WindowXY):
-    @classmethod
-    def from_xy(cls, x: int, y: int) -> "MouseCursorXY":
-        return cast(MouseCursorXY, super().from_xy(x, y))
-
-    @classmethod
-    def zero_origin(cls) -> "MouseCursorXY":
-        return cast(MouseCursorXY, super().zero_origin())
-
-
-@dataclass(frozen=True)
-class MouseCursorMotion:
-    cursor: MouseCursorXY
+class MouseCursorEvent:
+    xy: WindowXY
     dx: int
     dy: int
     left: LeftMouseBit
@@ -37,15 +26,11 @@ class MouseCursorMotion:
 
     @cached_property
     def x(self) -> WindowX:
-        return self.cursor.x
+        return self.xy.x
 
     @cached_property
     def y(self) -> WindowY:
-        return self.cursor.y
-
-    @cached_property
-    def xy(self) -> WindowXY:
-        return self.cursor
+        return self.xy.y
 
     @classmethod
     def from_xy(
@@ -57,9 +42,9 @@ class MouseCursorMotion:
         left: int = 0,
         middle: int = 0,
         right: int = 0,
-    ) -> "MouseCursorMotion":
+    ) -> "MouseCursorEvent":
         return cls(
-            cursor=MouseCursorXY.from_xy(x=x, y=y),
+            xy=WindowXY.from_xy(x=x, y=y),
             dx=dx,
             dy=dy,
             left=LeftMouseBit(left),
@@ -68,9 +53,9 @@ class MouseCursorMotion:
         )
 
     @classmethod
-    def from_pygame(cls, d: PygameMouseMotionEventDict) -> "MouseCursorMotion":
+    def from_pygame(cls, d: PygameMouseMotionEventDict) -> "MouseCursorEvent":
         return cls(
-            cursor=MouseCursorXY.from_xy(x=d["pos"][0], y=d["pos"][1]),
+            xy=WindowXY.from_xy(x=d["pos"][0], y=d["pos"][1]),
             dx=d["rel"][0],
             dy=d["rel"][1],
             left=LeftMouseBit(d["buttons"][0]),
@@ -89,3 +74,17 @@ class MouseCursorMotion:
         return PygameEventFactory.mouse_motion(
             self.as_pygame(),
         )
+
+
+class Mouse:
+    def __init__(self) -> None:
+        self.cursor_xy = WindowXY.zero_origin()
+        self.left: Bit = Bit.zero
+        self.middle: Bit = Bit.zero
+        self.right: Bit = Bit.zero
+
+    def update(self, event: MouseCursorEvent) -> None:
+        self.cursor_xy = event.xy
+        self.left = event.left
+        self.middle = event.middle
+        self.right = event.right
