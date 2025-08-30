@@ -57,7 +57,8 @@ jobs:
       - name: "Run pre-commit"
         env:
           SKIP: no-commit-to-branch
-          PYTEST_ADDOPTS: "--flake-finder"
+          PYTEST_ADDOPTS: >-
+            --flake-finder ${{ runner.os != 'Windows' && '-W ignore:.*no fast renderer.*:UserWarning'}}
         run: uv run pre-commit run --all-files
       - name: "DEBUG: list artifacts"
         run: ls dist
