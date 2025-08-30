@@ -1,7 +1,9 @@
 import tracemalloc
+import warnings
 from collections.abc import AsyncGenerator, Generator, Iterable
 from os import environ
 from pathlib import Path
+from sys import platform
 
 import pytest
 from pytest import fixture
@@ -21,6 +23,14 @@ slow = pytest.mark.slow
 
 def pytest_sessionstart() -> None:
     tracemalloc.start(1000)
+
+
+def pytest_configure() -> None:  # pragma: no cover
+    if "CI" in environ and platform != "win32":
+        warnings.filterwarnings(
+            "ignore",
+            message=r".*no fast renderer available.*",
+        )
 
 
 @fixture(scope="session", autouse=True)
