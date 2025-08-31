@@ -1,6 +1,15 @@
-import pytest
+from collections.abc import Callable
+from typing import Any
 
-from zero.contextmanagers import assert_raises
+import pygame
+from pygame import Surface
+
+from tests.conftest import Fixture, fixture, raises
+from zero.contextmanagers import (
+    assert_raises,
+    load_pygame,
+    suppress_no_fast_renderer_warning,
+)
 
 
 def always_fail(e: type[BaseException], msg: str) -> None:
@@ -13,5 +22,39 @@ def test_assert_raises() -> None:
     with assert_raises(e, msg):
         always_fail(e, msg)
 
-    with pytest.raises(AssertionError), assert_raises(e, msg):
+    with raises(AssertionError), assert_raises(e, msg):
         pass
+
+
+def assert_warning(match: str, callback: Callable[[], Any]) -> None:
+    with raises(Warning, match=match):
+        callback()
+
+
+type ScaledDisplayFactory = Callable[[], Surface]
+
+
+@fixture
+def scaled_display_factory() -> Fixture[ScaledDisplayFactory]:
+    assert not pygame.get_init()
+
+    def _factory() -> Surface:
+        return pygame.display.set_mode((1, 1), flags=pygame.SCALED)
+
+    with load_pygame():
+        yield _factory
+
+
+def assert_fast_renderer_warning(callback: Callable[[], Any]) -> None:
+    assert_warning("no fast renderer available", callback)
+
+
+def test_pygame_no_fast_renderer_warning_suppressor(
+    scaled_display_factory: ScaledDisplayFactory,
+) -> None:
+    assert_fast_renderer_warning(scaled_display_factory)
+
+    with suppress_no_fast_renderer_warning():
+        scaled_display_factory()
+
+    assert_fast_renderer_warning(scaled_display_factory)

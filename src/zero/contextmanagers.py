@@ -1,5 +1,8 @@
+import warnings
 from collections.abc import Generator
 from contextlib import contextmanager
+
+import pygame
 
 type ContextManager[T] = Generator[T, None, None]
 
@@ -21,3 +24,23 @@ def assert_raises(
 
     assert type(caught) is expected_type
     assert message in caught.args
+
+
+@contextmanager
+def suppress_no_fast_renderer_warning(
+    expected_warning: str = "no fast renderer available",
+) -> ContextManager[None]:
+    with warnings.catch_warnings():
+        warnings.filterwarnings(action="ignore", message=expected_warning)
+        yield
+
+
+@contextmanager
+def load_pygame() -> ContextManager[None]:
+    assert not pygame.get_init()
+    pygame.init()
+    try:
+        yield
+    finally:
+        assert pygame.get_init()
+        pygame.quit()
