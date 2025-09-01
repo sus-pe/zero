@@ -4,7 +4,7 @@ from pathlib import Path
 from pytest import fixture
 
 from tests.acceptance.conftest import assert_subprocess
-from tests.conftest import assert_dummy_sdl, skip_in_ci_if
+from tests.conftest import assert_dummy_sdl, assert_hw_sdl, skip_in_ci_if_not_windows
 
 
 @fixture
@@ -31,12 +31,12 @@ async def test_as_module(test_flags: list[str]) -> None:
     await assert_module(test_flags)
 
 
-@skip_in_ci_if(
-    sys.platform != "win32",
+@skip_in_ci_if_not_windows(
     reason="Only Windows runner supports fast renderer at-the-moment.",
 )
-async def test_with_hw_rendered(test_flags: list[str], sdl_hw_videodriver: str) -> None:
-    assert sdl_hw_videodriver != "dummy"
+async def test_with_hw_renderer(test_flags: list[str], sdl_hw_driver: str) -> None:
+    assert sdl_hw_driver != "dummy"
+    assert_hw_sdl()
     test_flags.append("--is-scaled")
     await assert_module(test_flags)
 
@@ -50,6 +50,23 @@ async def test_with_no_fast_renderer_warning_suppressor(test_flags: list[str]) -
     be used in CI.
     """
     assert_dummy_sdl()
+    test_flags.append("--is-scaled")
+    test_flags.append("--is-allow-no-fast-renderer")
+    await assert_module(test_flags)
+
+
+async def test_with_no_fast_renderer_warning_suppressor_with_hw_renderer(
+    test_flags: list[str], sdl_hw_driver: str
+) -> None:
+    """
+    In CI, ubuntu and macOS runners do not come out of the box with a fast video renderer.
+    This causes CI jobs to fail when running with --is-scaled.
+    I've decided I want CI to test --is-scaled, but I don't want to configure the runners with
+    fast renderer, so I chose to instead implement a flag to disable this warning, which will only
+    be used in CI.
+    """
+    assert sdl_hw_driver != "dummy"
+    assert_hw_sdl()
     test_flags.append("--is-scaled")
     test_flags.append("--is-allow-no-fast-renderer")
     await assert_module(test_flags)

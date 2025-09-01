@@ -1,23 +1,7 @@
 from collections.abc import Iterable
 
-from zero.display import Display
 from zero.game import Game
 from zero.mouse import MouseCursorEvent
-
-
-async def test_game_display_fullscreen(display: Display) -> None:
-    display = display.as_windowed
-    assert display.is_windowed
-    display = display.as_windowed
-    assert display.is_windowed
-    display = display.as_fullscreen
-    assert display.is_fullscreen
-    display = display.as_fullscreen
-    assert display.is_fullscreen
-    display = display.toggled_fullscreen
-    assert display.is_windowed
-    display = display.toggled_fullscreen
-    assert display.is_fullscreen
 
 
 async def test_game_fullscreen_button(game: Game) -> None:

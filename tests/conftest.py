@@ -11,6 +11,7 @@ from pytest import MarkDecorator, fixture
 
 from zero.mouse import MouseCursorEvent
 from zero.resources.loader import ResourceLoader
+from zero.sdl import SDL_AUDIODRIVER_ENV_KEY, SDL_VIDEODRIVER_ENV_KEY
 from zero.type_wrappers.arithmetic import Bit
 
 type Fixture[T] = Generator[T, None, None]
@@ -38,15 +39,31 @@ def pytest_configure() -> None:  # pragma: no cover
 @fixture(scope="session", autouse=True)
 def sdl_headless_env() -> None:
     # Must be set before pygame.init()
-    environ.setdefault("SDL_VIDEODRIVER", "dummy")
-    environ.setdefault("SDL_AUDIODRIVER", "dummy")
+    environ.setdefault(SDL_VIDEODRIVER_ENV_KEY, "dummy")
+    environ.setdefault(SDL_AUDIODRIVER_ENV_KEY, "dummy")
 
 
 @fixture
-def sdl_hw_videodriver() -> Fixture[str]:
-    prev = environ.pop("SDL_VIDEODRIVER")
+def sdl_hw_driver() -> Fixture[str]:
+    prev_video: str | None = None
+    if (
+        SDL_VIDEODRIVER_ENV_KEY in environ
+        and environ[SDL_VIDEODRIVER_ENV_KEY] == "dummy"
+    ):
+        prev_video = environ.pop(SDL_VIDEODRIVER_ENV_KEY)
+
+    prev_audio: str | None = None
+    if (
+        SDL_AUDIODRIVER_ENV_KEY in environ
+        and environ[SDL_AUDIODRIVER_ENV_KEY] == "dummy"
+    ):
+        prev_audio = environ.pop(SDL_AUDIODRIVER_ENV_KEY)
+
     yield "auto"
-    environ.setdefault("SDL_VIDEODRIVER", prev)
+    if prev_video:
+        environ[SDL_VIDEODRIVER_ENV_KEY] = prev_video
+    if prev_audio:
+        environ[SDL_AUDIODRIVER_ENV_KEY] = prev_audio
 
 
 @fixture
@@ -93,8 +110,19 @@ def stub_mouse_events() -> Iterable[MouseCursorEvent]:
 
 
 def assert_dummy_sdl() -> None:
-    assert environ.get("SDL_VIDEODRIVER") == "dummy"
-    assert environ.get("SDL_AUDIODRIVER") == "dummy"
+    assert environ.get(SDL_VIDEODRIVER_ENV_KEY) == "dummy"
+    assert environ.get(SDL_AUDIODRIVER_ENV_KEY) == "dummy"
+
+
+def assert_hw_sdl() -> None:
+    assert (
+        SDL_VIDEODRIVER_ENV_KEY not in environ
+        or environ.get(SDL_VIDEODRIVER_ENV_KEY) != "dummy"
+    )
+    assert (
+        SDL_AUDIODRIVER_ENV_KEY not in environ
+        or environ.get(SDL_AUDIODRIVER_ENV_KEY) != "dummy"
+    )
 
 
 def is_ci() -> bool:
@@ -106,3 +134,7 @@ def skip_in_ci_if(condition: Literal[True, False], reason: str) -> MarkDecorator
     Used Literal to avoid FBT001 linter warning.
     """
     return skipif(is_ci() and condition, reason=reason)
+
+
+def skip_in_ci_if_not_windows(reason: str) -> MarkDecorator:
+    return skip_in_ci_if(platform != "win32", reason=reason)

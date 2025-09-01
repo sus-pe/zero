@@ -8,6 +8,7 @@ import pygame
 from pygame import Surface
 
 from zero.contextmanagers import suppress_no_fast_renderer_warning
+from zero.sdl import SDL_VIDEODRIVER_ENV_KEY
 from zero.type_wrappers.arithmetic import NonNegInt
 
 
@@ -18,11 +19,13 @@ class DisplayConfig:
     is_fullscreen: bool
     is_allow_no_fast_renderer: bool
 
+    SLOW_RENDERER_ERROR_MSG: ClassVar[str] = "Dummy driver is slow with scaled."
+
     @cached_property
     def is_dummy_display(self) -> bool:
         return (
-            environ["SDL_VIDEODRIVER"] == "dummy"
-            if "SDL_VIDEODRIVER" in environ
+            environ[SDL_VIDEODRIVER_ENV_KEY] == "dummy"
+            if SDL_VIDEODRIVER_ENV_KEY in environ
             else False
         )
 
@@ -71,7 +74,7 @@ class DisplayConfig:
                 "Resizeable and Fullscreen are incompatible."
             )
         if flags & pygame.SCALED and not self.is_allow_no_fast_renderer:
-            assert not self.is_dummy_display, "Dummy driver is slow with scaled."
+            assert not self.is_dummy_display, self.SLOW_RENDERER_ERROR_MSG
 
 
 @dataclass(frozen=True)

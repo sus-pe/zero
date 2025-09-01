@@ -57,7 +57,7 @@ jobs:
       - name: "Run pre-commit"
         env:
           SKIP: no-commit-to-branch
-          PYTEST_ADDOPTS: --flake-finder
+          PYTEST_ADDOPTS: --flake-finder ${{ runner.os != 'Windows' && '--cov-config=".ci-non-windows-coveragerc.ini"' || ''}}
         run: uv run pre-commit run --all-files
       - name: "DEBUG: list artifacts"
         run: ls dist
