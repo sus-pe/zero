@@ -4,9 +4,10 @@ from collections.abc import AsyncGenerator, Generator, Iterable
 from os import environ
 from pathlib import Path
 from sys import platform
+from typing import Literal
 
 import pytest
-from pytest import fixture
+from pytest import MarkDecorator, fixture
 
 from zero.mouse import MouseCursorEvent
 from zero.resources.loader import ResourceLoader
@@ -19,6 +20,7 @@ parametrize = pytest.mark.parametrize
 xfail = pytest.mark.xfail
 raises = pytest.raises
 slow = pytest.mark.slow
+skipif = pytest.mark.skipif
 
 
 def pytest_sessionstart() -> None:
@@ -88,3 +90,19 @@ def stub_mouse_events() -> Iterable[MouseCursorEvent]:
             strict=True,
         )
     )
+
+
+def assert_dummy_sdl() -> None:
+    assert environ.get("SDL_VIDEODRIVER") == "dummy"
+    assert environ.get("SDL_AUDIODRIVER") == "dummy"
+
+
+def is_ci() -> bool:
+    return "CI" in environ
+
+
+def skip_in_ci_if(condition: Literal[True, False], reason: str) -> MarkDecorator:
+    """
+    Used Literal to avoid FBT001 linter warning.
+    """
+    return skipif(is_ci() and condition, reason=reason)

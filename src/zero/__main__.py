@@ -87,6 +87,7 @@ async def main(
     is_hidden: bool = False,
     is_fullscreen: bool = True,
     is_scaled: bool = True,
+    is_allow_no_fast_renderer: bool = False,
     post_load_plugin: GameLoaderPostLoadPlugin | None = None,
 ) -> int:
     async with AsyncLeakDetector():
@@ -94,6 +95,7 @@ async def main(
             is_scaled=is_scaled,
             is_hidden=is_hidden,
             is_fullscreen=is_fullscreen,
+            is_allow_no_fast_renderer=is_allow_no_fast_renderer,
         )
         test_plugin = (
             GameTestLoaderPostLoadPlugin() if is_test else DefaultPostLoadPlugin()
@@ -111,6 +113,7 @@ def _cli_main(
     is_hidden: bool = False,
     is_fullscreen: bool = True,
     is_scaled: bool = True,
+    is_allow_no_fast_renderer: bool = False,
 ) -> int:
     return safe_asyncio.run(
         main(
@@ -118,6 +121,7 @@ def _cli_main(
             is_fullscreen=is_fullscreen,
             is_hidden=is_hidden,
             is_scaled=is_scaled,
+            is_allow_no_fast_renderer=is_allow_no_fast_renderer,
         )
     )
 

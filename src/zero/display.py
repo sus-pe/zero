@@ -1,3 +1,4 @@
+from contextlib import nullcontext
 from dataclasses import dataclass, replace
 from functools import cached_property
 from os import environ
@@ -6,6 +7,7 @@ from typing import ClassVar
 import pygame
 from pygame import Surface
 
+from zero.contextmanagers import suppress_no_fast_renderer_warning
 from zero.type_wrappers.arithmetic import NonNegInt
 
 
@@ -14,6 +16,7 @@ class DisplayConfig:
     is_scaled: bool
     is_hidden: bool
     is_fullscreen: bool
+    is_allow_no_fast_renderer: bool
 
     @cached_property
     def is_dummy_display(self) -> bool:
@@ -67,7 +70,7 @@ class DisplayConfig:
             assert not flags & pygame.RESIZABLE, (
                 "Resizeable and Fullscreen are incompatible."
             )
-        if flags & pygame.SCALED:
+        if flags & pygame.SCALED and not self.is_allow_no_fast_renderer:
             assert not self.is_dummy_display, "Dummy driver is slow with scaled."
 
 
@@ -80,9 +83,15 @@ class Display:
     def surface(
         self,
     ) -> Surface:
-        surface = pygame.display.set_mode(
-            self.config.supported_resolutions[0], flags=self.config.pygame_flags
+        context = (
+            suppress_no_fast_renderer_warning()
+            if self.config.is_allow_no_fast_renderer
+            else nullcontext()
         )
+        with context:
+            surface = pygame.display.set_mode(
+                self.config.supported_resolutions[0], flags=self.config.pygame_flags
+            )
         pygame.display.set_caption(self.caption)
         return surface
 

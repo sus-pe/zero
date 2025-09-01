@@ -12,6 +12,7 @@ def display_config() -> DisplayConfig:
         is_scaled=False,
         is_hidden=True,
         is_fullscreen=True,
+        is_allow_no_fast_renderer=False,
     )
 
 
