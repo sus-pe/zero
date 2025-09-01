@@ -6,6 +6,7 @@ from pathlib import Path
 from sys import platform
 from typing import Literal
 
+import pygame
 import pytest
 from pytest import MarkDecorator, fixture
 
@@ -41,6 +42,16 @@ def sdl_headless_env() -> None:
     # Must be set before pygame.init()
     environ.setdefault(SDL_VIDEODRIVER_ENV_KEY, "dummy")
     environ.setdefault(SDL_AUDIODRIVER_ENV_KEY, "dummy")
+
+
+@fixture(autouse=True)
+def _assert_clean_pygame() -> Fixture[None]:
+    """
+    Detect missing pygame.quit() in tests.
+    """
+    assert not pygame.get_init()
+    yield
+    assert not pygame.get_init()
 
 
 @fixture
