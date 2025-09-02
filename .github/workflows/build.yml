@@ -1,0 +1,85 @@
+name: Build Matrix
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+env:
+  PYTHON_VERSION: "3.12"
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            sdl-setup: |
+              sudo apt-get update
+              sudo apt-get install -y pulseaudio xvfb
+              # Prepare a PulseAudio null sink for SDL
+              pulseaudio -D --exit-idle-time=-1 --disallow-exit
+              pactl load-module module-null-sink sink_name=ci_sink
+              pactl set-default-sink ci_sink
+              # Setup X11 display
+              Xvfb :99 -screen 0 1024x768x24 &
+              export DISPLAY=:99
+              sleep 3
+            env:
+              SDL_AUDIODRIVER: pulse
+              SDL_VIDEODRIVER: x11
+          - os: macos-latest
+            sdl-setup: "" # nothing special needed
+            env: {}
+          - os: windows-latest
+            sdl-setup: "" # nothing special needed
+            env: {}
+    steps:
+      - uses: actions/checkout@v4
+      - name: "Setup Rust and taplo"
+        run: |
+          rustup update stable
+          rustup default stable
+          cargo --version
+          cargo install taplo-cli
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: "pyproject.toml"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: "Setup precommit cache dir path"
+        uses: actions/github-script@v7
+        id: set-pre-commit-home
+        with:
+          script: |
+            const os = require('os');
+            const path = require('path');
+            const home = process.env.HOME || process.env.USERPROFILE || os.homedir();
+            const pch = path.join(home, '.cache', 'pre-commit');
+            core.exportVariable('PRE_COMMIT_HOME', pch);
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .venv
+            ${{ env.PRE_COMMIT_HOME }}
+          key: ${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('pyproject.toml', 'uv.lock', '.pre-commit-config.yaml') }}
+      - run: uv sync --locked
+      - name: "Setup SDL stack"
+        # OS-specific SDL/audio/video setup
+
+        run: ${{ matrix.sdl-setup }}
+        shell: bash
+      - name: "Run pre-commit (with pytest)"
+        env:
+          SKIP: no-commit-to-branch
+          SDL_AUDIODRIVER: ${{ matrix.env.SDL_AUDIODRIVER || '' }}
+          SDL_VIDEODRIVER: ${{ matrix.env.SDL_VIDEODRIVER || '' }}
+          PYTEST_ADDOPTS: >-
+            --flake-finder ${{ runner.os != 'Windows' && '--cov-config=.ci-non-windows-coveragerc.ini' || '' }}
+        run: uv run pre-commit run --all-files
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }}-dist
+          path: dist/*
+          if-no-files-found: error

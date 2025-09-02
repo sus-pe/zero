@@ -38,10 +38,37 @@ def pytest_configure() -> None:  # pragma: no cover
 
 
 @fixture(scope="session", autouse=True)
-def sdl_headless_env() -> None:
-    # Must be set before pygame.init()
-    environ.setdefault(SDL_VIDEODRIVER_ENV_KEY, "dummy")
-    environ.setdefault(SDL_AUDIODRIVER_ENV_KEY, "dummy")
+def sdl_headless_env() -> Fixture[None]:  # pragma: no cover
+    """
+    # TODO - PRAGMA YES COVER
+    """
+    prev_video: str | None = None
+    if (
+        SDL_VIDEODRIVER_ENV_KEY in environ
+        and environ[SDL_VIDEODRIVER_ENV_KEY] != "dummy"
+    ):
+        prev_video = environ.pop(SDL_VIDEODRIVER_ENV_KEY)
+
+    prev_audio: str | None = None
+    if (
+        SDL_AUDIODRIVER_ENV_KEY in environ
+        and environ[SDL_AUDIODRIVER_ENV_KEY] != "dummy"
+    ):
+        prev_audio = environ.pop(SDL_AUDIODRIVER_ENV_KEY)
+
+    environ[SDL_VIDEODRIVER_ENV_KEY] = "dummy"
+    environ[SDL_AUDIODRIVER_ENV_KEY] = "dummy"
+
+    yield
+
+    if prev_video:
+        environ[SDL_VIDEODRIVER_ENV_KEY] = prev_video
+    else:
+        environ.pop(SDL_VIDEODRIVER_ENV_KEY)
+    if prev_audio:
+        environ[SDL_AUDIODRIVER_ENV_KEY] = prev_audio
+    else:
+        environ.pop(SDL_AUDIODRIVER_ENV_KEY)
 
 
 @fixture(autouse=True)
@@ -55,22 +82,27 @@ def _assert_clean_pygame() -> Fixture[None]:
 
 
 @fixture
-def sdl_hw_driver() -> Fixture[str]:
+def sdl_hw_driver() -> Fixture[str]:  # pragma: no cover
+    """
+    TODO: PRAGMA YES COVER
+    """
     prev_video: str | None = None
-    if (
-        SDL_VIDEODRIVER_ENV_KEY in environ
-        and environ[SDL_VIDEODRIVER_ENV_KEY] == "dummy"
-    ):
-        prev_video = environ.pop(SDL_VIDEODRIVER_ENV_KEY)
+    video = "auto"
+    if SDL_VIDEODRIVER_ENV_KEY in environ:
+        if environ[SDL_VIDEODRIVER_ENV_KEY] == "dummy":
+            prev_video = environ.pop(SDL_VIDEODRIVER_ENV_KEY)
+        else:
+            video = environ[SDL_VIDEODRIVER_ENV_KEY]
 
     prev_audio: str | None = None
-    if (
-        SDL_AUDIODRIVER_ENV_KEY in environ
-        and environ[SDL_AUDIODRIVER_ENV_KEY] == "dummy"
-    ):
-        prev_audio = environ.pop(SDL_AUDIODRIVER_ENV_KEY)
+    audio = "auto"
+    if SDL_AUDIODRIVER_ENV_KEY in environ:
+        if environ[SDL_AUDIODRIVER_ENV_KEY] == "dummy":
+            prev_audio = environ.pop(SDL_AUDIODRIVER_ENV_KEY)
+        else:
+            audio = environ[SDL_AUDIODRIVER_ENV_KEY]
 
-    yield "auto"
+    yield f"{video=} {audio=}"
     if prev_video:
         environ[SDL_VIDEODRIVER_ENV_KEY] = prev_video
     if prev_audio:
