@@ -57,6 +57,7 @@ include = [
 [tool.pytest.ini_options]
 addopts = [
     "-n=auto",
+    "--timeout=15",
     "--cov=src",
     "--cov=tests",
     "--cov-fail-under=100",

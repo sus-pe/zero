@@ -12,7 +12,13 @@ from pytest import MarkDecorator, fixture
 
 from zero.mouse import MouseCursorEvent
 from zero.resources.loader import ResourceLoader
-from zero.sdl import SDL_AUDIODRIVER_ENV_KEY, SDL_VIDEODRIVER_ENV_KEY
+from zero.sdl import (
+    SDL_AUDIODRIVER_ENV_KEY,
+    SDL_VIDEODRIVER_ENV_KEY,
+    preserve_sdl_env,
+    with_dummy_sdl_env,
+    with_hw_sdl_env,
+)
 from zero.type_wrappers.arithmetic import Bit
 
 type Fixture[T] = Generator[T, None, None]
@@ -29,46 +35,24 @@ def pytest_sessionstart() -> None:
     tracemalloc.start(1000)
 
 
-def pytest_configure() -> None:  # pragma: no cover
-    if "CI" in environ and platform != "win32":
-        warnings.filterwarnings(
-            "ignore",
-            message=r".*no fast renderer available.*",
-        )
+@fixture
+def sdl_hw_driver() -> Fixture[str]:
+    """Fixture for hardware SDL driver (non-dummy if possible)."""
+    with with_hw_sdl_env() as (video, audio):
+        yield f"{video=} {audio=}"
 
 
 @fixture(scope="session", autouse=True)
-def sdl_headless_env() -> Fixture[None]:  # pragma: no cover
-    """
-    # TODO - PRAGMA YES COVER
-    """
-    prev_video: str | None = None
-    if (
-        SDL_VIDEODRIVER_ENV_KEY in environ
-        and environ[SDL_VIDEODRIVER_ENV_KEY] != "dummy"
-    ):
-        prev_video = environ.pop(SDL_VIDEODRIVER_ENV_KEY)
+def sdl_headless_env() -> Fixture[str]:
+    """Fixture that forces SDL to run in headless (dummy) mode."""
+    with with_dummy_sdl_env() as (video, audio):
+        yield f"{video=} {audio=}"
 
-    prev_audio: str | None = None
-    if (
-        SDL_AUDIODRIVER_ENV_KEY in environ
-        and environ[SDL_AUDIODRIVER_ENV_KEY] != "dummy"
-    ):
-        prev_audio = environ.pop(SDL_AUDIODRIVER_ENV_KEY)
 
-    environ[SDL_VIDEODRIVER_ENV_KEY] = "dummy"
-    environ[SDL_AUDIODRIVER_ENV_KEY] = "dummy"
-
-    yield
-
-    if prev_video:
-        environ[SDL_VIDEODRIVER_ENV_KEY] = prev_video
-    else:
-        environ.pop(SDL_VIDEODRIVER_ENV_KEY)
-    if prev_audio:
-        environ[SDL_AUDIODRIVER_ENV_KEY] = prev_audio
-    else:
-        environ.pop(SDL_AUDIODRIVER_ENV_KEY)
+@fixture(autouse=True)
+def clean_env() -> Fixture[None]:
+    with preserve_sdl_env():
+        yield
 
 
 @fixture(autouse=True)
@@ -81,32 +65,12 @@ def _assert_clean_pygame() -> Fixture[None]:
     assert not pygame.get_init()
 
 
-@fixture
-def sdl_hw_driver() -> Fixture[str]:  # pragma: no cover
-    """
-    TODO: PRAGMA YES COVER
-    """
-    prev_video: str | None = None
-    video = "auto"
-    if SDL_VIDEODRIVER_ENV_KEY in environ:
-        if environ[SDL_VIDEODRIVER_ENV_KEY] == "dummy":
-            prev_video = environ.pop(SDL_VIDEODRIVER_ENV_KEY)
-        else:
-            video = environ[SDL_VIDEODRIVER_ENV_KEY]
-
-    prev_audio: str | None = None
-    audio = "auto"
-    if SDL_AUDIODRIVER_ENV_KEY in environ:
-        if environ[SDL_AUDIODRIVER_ENV_KEY] == "dummy":
-            prev_audio = environ.pop(SDL_AUDIODRIVER_ENV_KEY)
-        else:
-            audio = environ[SDL_AUDIODRIVER_ENV_KEY]
-
-    yield f"{video=} {audio=}"
-    if prev_video:
-        environ[SDL_VIDEODRIVER_ENV_KEY] = prev_video
-    if prev_audio:
-        environ[SDL_AUDIODRIVER_ENV_KEY] = prev_audio
+def pytest_configure() -> None:  # pragma: no cover
+    if "CI" in environ and platform != "win32":
+        warnings.filterwarnings(
+            "ignore",
+            message=r".*no fast renderer available.*",
+        )
 
 
 @fixture
