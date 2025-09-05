@@ -80,5 +80,5 @@ class GameLoader:
             pygame.quit()
             await self._task_group.__aexit__(None, None, None)
 
-    def register(self, plugin: GameLoaderPostLoadPlugin) -> None:
+    def register_post_load_plugin(self, plugin: GameLoaderPostLoadPlugin) -> None:
         self._post_load_plugins.append(plugin)
