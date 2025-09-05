@@ -8,7 +8,7 @@ from typing import Literal
 
 import pygame
 import pytest
-from pytest import MarkDecorator, fixture
+from pytest import MarkDecorator
 
 from zero.mouse import MouseCursorEvent
 from zero.resources.loader import ResourceLoader
@@ -29,6 +29,7 @@ xfail = pytest.mark.xfail
 raises = pytest.raises
 slow = pytest.mark.slow
 skipif = pytest.mark.skipif
+fixture = pytest.fixture
 
 
 def pytest_sessionstart() -> None:

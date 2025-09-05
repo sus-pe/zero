@@ -7,7 +7,11 @@ from zero import safe_asyncio
 from zero.display import DisplayConfig
 from zero.game_loader import GameLoader, GameLoaderPostLoadPlugin
 from zero.game_loader_plugins import DefaultPostLoadPlugin, GameTestLoaderPostLoadPlugin
+from zero.logger import create_for
 from zero.safe_asyncio import AsyncLeakDetector
+from zero.support import CompositeSupport, LoggerSupport, Support
+
+logger = create_for(__file__)
 
 
 @dataclass(frozen=True)
@@ -50,6 +54,7 @@ MainArgs.PROD = MainArgs(
 class MainConfig:
     display: DisplayConfig
     post_load_plugins: list[GameLoaderPostLoadPlugin]
+    support: Support
 
     @classmethod
     def create_from(
@@ -57,6 +62,7 @@ class MainConfig:
         *,
         args: MainArgs,
         post_load_plugin: GameLoaderPostLoadPlugin | None,
+        support: Support | None,
     ) -> "MainConfig":
         display = DisplayConfig(
             is_scaled=args.is_scaled,
@@ -70,20 +76,31 @@ class MainConfig:
         post_load_plugin = (
             post_load_plugin if post_load_plugin else DefaultPostLoadPlugin()
         )
-        return MainConfig(display, [test_plugin, post_load_plugin])
+
+        support = support if support else LoggerSupport(logger)
+        supports = CompositeSupport(support)
+
+        return MainConfig(display, [test_plugin, post_load_plugin], supports)
 
 
 class Main:
     def __init__(
         self,
         game_loader: GameLoader,
+        support: Support,
     ) -> None:
         self._loader = game_loader
+        self._support = support
 
     async def main(self) -> int:
-        async with AsyncLeakDetector():
-            await self._load_game_and_wait_exit()
-        return 0
+        try:
+            async with AsyncLeakDetector():
+                await self._load_game_and_wait_exit()
+        except BaseException as e:
+            self._support.notify_crashed(e)
+            raise
+        else:
+            return 0
 
     async def _load_game_and_wait_exit(
         self,
@@ -98,6 +115,7 @@ class Main:
             loader.register_post_load_plugin(plugin)
         return Main(
             game_loader=loader,
+            support=config.support,
         )
 
 
@@ -105,19 +123,23 @@ async def main(
     args: MainArgs,
     *,
     post_load_plugin: GameLoaderPostLoadPlugin | None = None,
+    support: Support | None = None,
 ) -> int:
     config = MainConfig.create_from(
         args=args,
         post_load_plugin=post_load_plugin,
+        support=support,
     )
     return await Main.create_from(config).main()
 
 
 async def main_test(
+    support: Support,
     test_args: MainArgs = MainArgs.TEST,
     post_load_plugin: GameLoaderPostLoadPlugin | None = None,
 ) -> int:
     return await main(
+        support=support,
         args=test_args,
         post_load_plugin=post_load_plugin,
     )
