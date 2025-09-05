@@ -4,7 +4,7 @@ Provides an entrypoint for running as wheel, e.g. `python zero*.whl`
 
 import typer
 
-from zero.__main__ import _cli_main
+from zero.__main__ import cli_main
 
 if __name__ == "__main__":  # pragma: no cover
-    typer.run(_cli_main)
+    typer.run(cli_main)

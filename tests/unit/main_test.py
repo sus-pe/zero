@@ -15,11 +15,9 @@ class AlwaysFailPostLoadPlugin(GameLoaderPostLoadPlugin):
 
 
 async def test_sanity() -> None:
-    await __main__.main(is_test=True, is_hidden=True, is_scaled=False)
+    await __main__.main_test()
 
 
 async def test_post_load_plugin_failure() -> None:
     with raises(AlwaysFailError):
-        await __main__.main(
-            is_test=True, is_scaled=False, post_load_plugin=AlwaysFailPostLoadPlugin()
-        )
+        await __main__.main_test(post_load_plugin=AlwaysFailPostLoadPlugin())
