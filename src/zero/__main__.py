@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import ClassVar
 
 import typer
@@ -19,6 +19,14 @@ class MainArgs:
     is_test: bool
 
     TEST: ClassVar["MainArgs"]
+    PROD: ClassVar["MainArgs"]
+
+    def override(self, **kwargs: bool | None) -> "MainArgs":
+        sanitized_kwargs = {k: v for k, v in kwargs.items() if v is not None}
+        return replace(
+            self,
+            **sanitized_kwargs,
+        )
 
 
 MainArgs.TEST = MainArgs(
@@ -26,6 +34,14 @@ MainArgs.TEST = MainArgs(
     is_scaled=False,
     is_hidden=True,
     is_fullscreen=False,
+    is_allow_no_fast_renderer=False,
+)
+
+MainArgs.PROD = MainArgs(
+    is_test=False,
+    is_scaled=True,
+    is_hidden=False,
+    is_fullscreen=True,
     is_allow_no_fast_renderer=False,
 )
 
@@ -109,17 +125,17 @@ async def main_test(
 
 def cli_main(
     *,
-    is_test: bool = False,
-    is_hidden: bool = False,
-    is_fullscreen: bool = True,
-    is_scaled: bool = True,
-    is_allow_no_fast_renderer: bool = False,
+    is_test: bool | None = None,
+    is_hidden: bool | None = None,
+    is_fullscreen: bool | None = None,
+    is_scaled: bool | None = None,
+    is_allow_no_fast_renderer: bool | None = None,
 ) -> int:
-    args = MainArgs(
-        is_test=is_test,
+    args = MainArgs.TEST if is_test else MainArgs.PROD
+    args = args.override(
+        is_scaled=is_scaled,
         is_hidden=is_hidden,
         is_fullscreen=is_fullscreen,
-        is_scaled=is_scaled,
         is_allow_no_fast_renderer=is_allow_no_fast_renderer,
     )
     return safe_asyncio.run(main(args))
