@@ -1,36 +1,51 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-name: Python package
+name: Build Matrix
 on:
   push:
     branches: ["master"]
   pull_request:
     branches: ["master"]
+env:
+  PYTHON_VERSION: "3.12"
 jobs:
   build:
-    permissions:
-      contents: write
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.12"]
+        include:
+          - os: ubuntu-latest
+            sdl-setup: |
+              sudo apt-get update
+              sudo apt-get install -y pulseaudio xvfb
+              # Prepare a PulseAudio null sink for SDL
+              pulseaudio -D --exit-idle-time=-1 --disallow-exit
+              pactl load-module module-null-sink sink_name=ci_sink
+              pactl set-default-sink ci_sink
+              # Setup X11 display
+              Xvfb :99 -screen 0 1024x768x24 &
+              export DISPLAY=:99
+              sleep 3
+            env:
+              SDL_AUDIODRIVER: pulse
+              SDL_VIDEODRIVER: x11
+          - os: macos-latest
+            sdl-setup: "" # nothing special needed
+            env: {}
+          - os: windows-latest
+            sdl-setup: "" # nothing special needed
+            env: {}
     steps:
-      - name: "Checkout Repo"
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       - name: "Setup Rust and taplo"
         run: |
           rustup update stable
           rustup default stable
           cargo --version
           cargo install taplo-cli
-      - name: "Setup Python"
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version-file: "pyproject.toml"
-      - name: "Setup uv"
-        uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
       - name: "Setup precommit cache dir path"
@@ -41,58 +56,51 @@ jobs:
             const os = require('os');
             const path = require('path');
             const home = process.env.HOME || process.env.USERPROFILE || os.homedir();
-            if (!home) core.setFailed('Could not resolve HOME/USERPROFILE on this runner.');
             const pch = path.join(home, '.cache', 'pre-commit');
             core.exportVariable('PRE_COMMIT_HOME', pch);
-            core.info(`PRE_COMMIT_HOME = ${pch}`);
-      - name: "Setup caches for venv and pre-commit"
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: |
             .venv
             ${{ env.PRE_COMMIT_HOME }}
-          key: ${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock', '.pre-commit-config.yaml') }}
-      - name: "Run uv sync"
-        run: uv sync --locked
-      - name: "Run pre-commit"
+          key: ${{ runner.os }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('pyproject.toml', 'uv.lock', '.pre-commit-config.yaml') }}
+      - run: uv sync --locked
+      - name: "Setup SDL stack"
+        # OS-specific SDL/audio/video setup
+
+        run: ${{ matrix.sdl-setup }}
+        shell: bash
+      - name: "Run pre-commit (with pytest)"
         env:
           SKIP: no-commit-to-branch
+          SDL_AUDIODRIVER: ${{ matrix.env.SDL_AUDIODRIVER || '' }}
+          SDL_VIDEODRIVER: ${{ matrix.env.SDL_VIDEODRIVER || '' }}
+          PYTEST_ADDOPTS: >-
+            --flake-finder ${{ runner.os != 'Windows' && '--cov-config=.ci-non-windows-coveragerc.ini' || '' }}
         run: uv run pre-commit run --all-files
-      - name: "DEBUG: list artifacts"
-        run: ls dist
-      - name: "Upload sdist/bdist artifacts"
+      - uses: actions/upload-artifact@v4
         if: ${{ runner.os == 'Linux' }} # Must prevent multiple runs or release fails on collisions
-        uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-dist
-          path: 'dist/*'
+          path: dist/*
           if-no-files-found: error
   release:
-    needs: build
     runs-on: ubuntu-latest
+    needs: build
     permissions:
       contents: write
-    concurrency:
-      group: release-${{ github.ref }}
-      cancel-in-progress: false
     steps:
-      - name: "Setup repo"
-        uses: actions/checkout@v4
-      - name: "Setup uv"
-        uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-      - name: "Setup cross-platform release metadata"
-        uses: actions/github-script@v7
+      - uses: actions/github-script@v7
         id: meta
         with:
           script: |
             const { execSync } = require('child_process');
-
-            // Read uv version
             const uvVersion = execSync('uv version --short', { encoding: 'utf8' }).trim();
             const version = `v${uvVersion}`;
-
             const commit = process.env.GITHUB_SHA;
             const eventName = process.env.GITHUB_EVENT_NAME;
             const runNumber = process.env.GITHUB_RUN_NUMBER;
@@ -109,17 +117,12 @@ jobs:
 
             core.setOutput('release_id', release_id);
             core.setOutput('is_draft', String(draft));
-            core.setOutput('is_prerelease', 'true')
-      - name: "Download artifacts from latest build"
-        uses: actions/download-artifact@v4
+            core.setOutput('is_prerelease', 'true');
+      - uses: actions/download-artifact@v4
         with:
           path: release_artifacts
-      - name: "[DEBUG] List downloaded artifacts"
-        run: |
-          echo "=== DOWNLOADED ARTIFACTS ==="
-          ls -R release_artifacts || dir release_artifacts
-      - name: "Release"
-        uses: softprops/action-gh-release@v2
+      - run: ls -R release_artifacts
+      - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.meta.outputs.release_id }}
           name: ${{ steps.meta.outputs.release_id }}

@@ -20,6 +20,9 @@ test = [
     "pytest-cov>=6.2.1,<7",
     "pytest-asyncio>=1.1.0",
     "pytest-timeout>=2.4.0",
+    "pytest-randomly>=3.16.0",
+    "pytest-flakefinder>=1.1.0",
+    "pytest-xdist[psutil]>=3.8.0",
 ]
 
 [tool.uv]
@@ -53,20 +56,20 @@ include = [
 
 [tool.pytest.ini_options]
 addopts = [
+    "-n=auto",
+    "--timeout=15",
     "--cov=src",
     "--cov=tests",
     "--cov-fail-under=100",
     "--cov-report=term-missing",
-    "--timeout=10",
+    "-W=error",
 ]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-markers = ["slow: marks tests as slow and should use longer timeout"]
 
 [tool.vulture]
 paths = ["tests", "src"]
 sort_by_size = true
-ignore_decorators = ["@fixture", "@typed_dict"]
 exclude = ["**/typed_dict.py"]
 min_confidence = 80
 
