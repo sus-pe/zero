@@ -19,3 +19,5 @@ tests/unit/zero/__pycache__/
 tests/unit/__pycache__/
 
 .xml
+
+tests/unit/zero/type_wrappers/__pycache__/
