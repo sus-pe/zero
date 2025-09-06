@@ -17,3 +17,5 @@ tests/acceptance/__pycache__/
 tests/unit/zero/__pycache__/
 
 tests/unit/__pycache__/
+
+.xml
