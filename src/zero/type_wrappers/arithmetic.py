@@ -69,3 +69,19 @@ Trit.two = Trit(2)
 class NotTritError(ValueError):
     def __init__(self, x: int) -> None:
         super().__init__(f"Not a bit: {x}")
+
+
+class PositiveInt(NonNegInt):
+    def __new__(cls, value: int) -> "PositiveInt":
+        if value < 1:
+            raise NotPositiveIntError(value)
+        return cast(PositiveInt, super().__new__(cls, value))
+
+
+class NotPositiveIntError(ValueError):
+    def __init__(self, x: int) -> None:
+        super().__init__(f"Not a positive integer: {x}")
+
+
+class Pixels(PositiveInt):
+    pass

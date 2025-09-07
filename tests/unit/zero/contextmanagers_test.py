@@ -6,8 +6,8 @@ from pygame import Surface
 
 from tests.conftest import Fixture, fixture, raises
 from zero.contextmanagers import (
+    PygameContext,
     assert_raises,
-    load_pygame,
     suppress_no_fast_renderer_warning,
 )
 
@@ -35,14 +35,15 @@ type ScaledDisplayFactory = Callable[[], Surface]
 
 
 @fixture
-def scaled_display_factory() -> Fixture[ScaledDisplayFactory]:
-    assert not pygame.get_init()
+def scaled_display_factory(
+    pygame_context: PygameContext,
+) -> Fixture[ScaledDisplayFactory]:
+    pygame_context.assert_init()
 
     def _factory() -> Surface:
         return pygame.display.set_mode((1, 1), flags=pygame.SCALED)
 
-    with load_pygame():
-        yield _factory
+    yield _factory
 
 
 def assert_fast_renderer_warning(callback: Callable[[], Any]) -> None:

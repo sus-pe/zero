@@ -4,6 +4,7 @@ from typing import ClassVar
 import typer
 
 from zero import safe_asyncio
+from zero.contextmanagers import PygameContext
 from zero.display import DisplayConfig
 from zero.game_loader import GameLoader, GameLoaderPostLoadPlugin
 from zero.game_loader_plugins import DefaultPostLoadPlugin, GameTestLoaderPostLoadPlugin
@@ -84,39 +85,28 @@ class MainConfig:
 
 
 class Main:
-    def __init__(
-        self,
-        game_loader: GameLoader,
-        support: Support,
-    ) -> None:
-        self._loader = game_loader
-        self._support = support
-
-    async def main(self) -> int:
+    async def main(self, config: MainConfig) -> int:
         try:
             async with AsyncLeakDetector():
-                await self._load_game_and_wait_exit()
+                await self._load_game_and_wait_exit(
+                    config.display, config.post_load_plugins
+                )
         except BaseException as e:
-            self._support.notify_crashed(e)
+            config.support.notify_crashed(e)
             raise
         else:
             return 0
 
     async def _load_game_and_wait_exit(
         self,
+        display: DisplayConfig,
+        post_load_plugins: list[GameLoaderPostLoadPlugin],
     ) -> None:
-        async with self._loader as game:
-            await game.wait_exit()
+        with PygameContext() as context:
+            loader = GameLoader(display, context, post_load_plugins)
 
-    @classmethod
-    def create_from(cls, config: MainConfig) -> "Main":
-        loader = GameLoader(display_config=config.display)
-        for plugin in config.post_load_plugins:
-            loader.register_post_load_plugin(plugin)
-        return Main(
-            game_loader=loader,
-            support=config.support,
-        )
+            async with loader as game:
+                await game.wait_exit()
 
 
 async def main(
@@ -130,7 +120,7 @@ async def main(
         post_load_plugin=post_load_plugin,
         support=support,
     )
-    return await Main.create_from(config).main()
+    return await Main().main(config)
 
 
 async def main_test(

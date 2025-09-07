@@ -9,7 +9,38 @@ from pygame import Surface
 
 from zero.contextmanagers import suppress_no_fast_renderer_warning
 from zero.sdl import SDL_VIDEODRIVER_ENV_KEY
-from zero.type_wrappers.arithmetic import NonNegInt
+from zero.type_wrappers.arithmetic import NonNegInt, Pixels
+from zero.type_wrappers.window import WindowX, WindowXY, WindowY
+
+
+class DisplayWidth(Pixels):
+    pass
+
+
+class DisplayHeight(Pixels):
+    pass
+
+
+@dataclass(frozen=True)
+class Resolution:
+    width: DisplayWidth
+    height: DisplayHeight
+
+    @cached_property
+    def tuple(self) -> tuple[DisplayWidth, DisplayHeight]:
+        return (self.width, self.height)
+
+    @cached_property
+    def max_x(self) -> WindowX:
+        return WindowX(self.width - 1)
+
+    @cached_property
+    def max_y(self) -> WindowY:
+        return WindowY(self.height - 1)
+
+    @cached_property
+    def max_xy(self) -> WindowXY:
+        return WindowXY(self.max_x, self.max_y)
 
 
 @dataclass(frozen=True)
@@ -33,12 +64,17 @@ class DisplayConfig:
         self._assert_safe_flags()
 
     @cached_property
-    def supported_resolutions(self) -> list[tuple[NonNegInt, NonNegInt]]:
+    def supported_resolutions(self) -> list[Resolution]:
         res = [
-            (NonNegInt(x), NonNegInt(y)) for x, y in pygame.display.get_desktop_sizes()
+            Resolution(width=DisplayWidth(w), height=DisplayHeight(h))
+            for w, h in pygame.display.get_desktop_sizes()
         ]
-        assert len(res) > 0, "Should be at least one supported resolution!"
+        assert res, "Should be at least one supported resolution!"
         return res
+
+    @cached_property
+    def preferred_resolution(self) -> Resolution:
+        return self.supported_resolutions[0]
 
     @cached_property
     def pygame_flags(self) -> int:
@@ -83,6 +119,18 @@ class Display:
     caption: str = "Jesus"
 
     @cached_property
+    def max_xy(self) -> WindowXY:
+        return self.resolution.max_xy
+
+    @cached_property
+    def origin(self) -> WindowXY:
+        return WindowXY.zero_origin()
+
+    @cached_property
+    def resolution(self) -> Resolution:
+        return self.config.preferred_resolution
+
+    @cached_property
     def surface(
         self,
     ) -> Surface:
@@ -93,7 +141,8 @@ class Display:
         )
         with context:
             surface = pygame.display.set_mode(
-                self.config.supported_resolutions[0], flags=self.config.pygame_flags
+                self.config.preferred_resolution.tuple,
+                flags=self.config.pygame_flags,
             )
         pygame.display.set_caption(self.caption)
         return surface
@@ -133,3 +182,17 @@ class Display:
     FULLSCREEN_FLAG: ClassVar[int] = pygame.FULLSCREEN
     RESIZEABLE_FLAG: ClassVar[int] = pygame.RESIZABLE
     SCALED_FLAG: ClassVar[int] = pygame.SCALED
+
+    def clamp(self, xy: WindowXY | tuple[int, int]) -> WindowXY:
+        if isinstance(xy, WindowXY):
+            return xy
+        return self._clamp(xy[0], xy[1])
+
+    def _clamp(self, x: int, y: int) -> WindowXY:
+        clamped_x = self._clamp_coordinate(x, self.resolution.max_x)
+        clamped_y = self._clamp_coordinate(y, self.resolution.max_y)
+        return WindowXY.from_xy(clamped_x, clamped_y)
+
+    def _clamp_coordinate(self, c: int, max_c: NonNegInt) -> NonNegInt:
+        res = 0 if c < 0 else min(c, max_c)
+        return NonNegInt(res)

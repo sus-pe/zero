@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from functools import cached_property
 
 from zero.type_wrappers.arithmetic import NonNegInt
 
@@ -15,6 +16,20 @@ class WindowY(NonNegInt):
 class WindowXY:
     x: WindowX
     y: WindowY
+
+    @cached_property
+    def negated(self) -> "WindowXY | tuple[int, int]":
+        """
+        If the origin is negated, then the origin is returned.
+        """
+        if self.is_origin:
+            return self
+
+        return -self.x, -self.y
+
+    @cached_property
+    def is_origin(self) -> bool:
+        return self.x == 0 and self.y == 0
 
     @classmethod
     def zero_origin(cls) -> "WindowXY":
@@ -37,3 +52,7 @@ class WindowXY:
         if item == 0:
             return self.x
         return self.y
+
+    @cached_property
+    def tuple(self) -> tuple[WindowX, WindowY]:
+        return (self.x, self.y)

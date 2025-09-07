@@ -28,3 +28,13 @@ async def test_mouse_cursor(
             assert game.is_displayed(game.mouse_cursor_sprite, cursor)
         else:
             assert game.is_displayed(game.mouse_cursor_pressed_sprite, cursor)
+
+
+async def test_mouse_cursor_out_of_boundary(
+    game: Game, stub_mouse_events: Iterable[MouseCursorEvent]
+) -> None:
+    for stub in stub_mouse_events:
+        event = stub.as_pygame_event()
+        event.dict["pos"] = tuple(-1 * c for c in event.dict["pos"])
+        game.send(event)
+        await game.wait_next_loop()
