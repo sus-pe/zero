@@ -5,7 +5,6 @@ from zero.type_wrappers.arithmetic import (
     MiddleMouseBit,
     RightMouseBit,
 )
-from zero.type_wrappers.window import WindowX, WindowY
 
 
 class PygameEventDict(TypedDict):
@@ -13,6 +12,6 @@ class PygameEventDict(TypedDict):
 
 
 class PygameMouseMotionEventDict(PygameEventDict):
-    pos: tuple[WindowX, WindowY]
+    pos: tuple[int, int]  # note: can be negative!
     rel: tuple[int, int]
     buttons: tuple[LeftMouseBit, MiddleMouseBit, RightMouseBit]

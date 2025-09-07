@@ -1,6 +1,7 @@
 import warnings
 from collections.abc import Generator
 from contextlib import contextmanager
+from types import TracebackType
 
 import pygame
 
@@ -35,12 +36,24 @@ def suppress_no_fast_renderer_warning(
         yield
 
 
-@contextmanager
-def load_pygame() -> ContextManager[None]:
-    assert not pygame.get_init()
-    pygame.init()
-    try:
-        yield
-    finally:
-        assert pygame.get_init()
+class PygameContext:
+    def __enter__(self) -> "PygameContext":
+        assert not self.is_init()
+        pygame.init()
+        return self
+
+    def __exit__(
+        self,
+        _exc_type: type[BaseException] | None,
+        _exc_val: BaseException | None,
+        _exc_tb: TracebackType | None,
+    ) -> bool | None:
+        self.assert_init()
         pygame.quit()
+        return CONTEXT_MANAGER_EXIT_DO_NOT_SUPPRESS_EXCEPTION
+
+    def is_init(self) -> bool:
+        return pygame.get_init()
+
+    def assert_init(self) -> None:
+        assert self.is_init()

@@ -7,6 +7,7 @@ from typing import cast
 
 import pygame
 from pygame import Clock
+from pygame import Event as PygameEvent
 
 from zero.display import Display
 from zero.mouse import Mouse, MouseCursorEvent
@@ -85,6 +86,7 @@ class Game:
                 clock.tick(self._fps)
                 self._loop_event.clear()
         finally:
+            self._loop_event.set()  # Ensure no waiters.
             assert self._is_loop_started_event.is_set()
             assert not self._is_loop_finished_event.is_set()
             self._is_loop_finished_event.set()
@@ -120,6 +122,7 @@ class Game:
     async def publish_mouse_motion_event(
         self, mouse_motion_event: PygameMouseMotionEventDict
     ) -> None:
+        mouse_motion_event["pos"] = self.display.clamp(mouse_motion_event["pos"]).tuple
         mouse_motion = MouseCursorEvent.from_pygame(mouse_motion_event)
         await self.publish_to(self._next_mouse_motion_subscribers, mouse_motion)
 
@@ -221,3 +224,6 @@ class Game:
 
     def send_f11(self) -> None:
         pygame.event.post(pygame.event.Event(pygame.KEYDOWN, {"key": pygame.K_F11}))
+
+    def send(self, event: PygameEvent) -> None:
+        pygame.event.post(event)
