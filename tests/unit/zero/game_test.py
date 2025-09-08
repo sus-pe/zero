@@ -35,6 +35,7 @@ async def test_mouse_cursor(
 async def test_mouse_cursor_out_of_boundary(
     game: Game, stub_mouse_events: Iterable[MouseCursorEvent]
 ) -> None:
+    # TODO: Cleanup this test
     for stub in stub_mouse_events:
         event = stub.as_pygame_event()
         event.dict["pos"] = tuple(-1 * c for c in event.dict["pos"])
