@@ -1,5 +1,6 @@
+from collections.abc import Iterator
 from contextlib import nullcontext
-from dataclasses import dataclass, replace
+from dataclasses import astuple, dataclass, replace
 from functools import cached_property
 from os import environ
 from typing import ClassVar
@@ -28,7 +29,7 @@ class Resolution:
 
     @cached_property
     def tuple(self) -> tuple[DisplayWidth, DisplayHeight]:
-        return (self.width, self.height)
+        return astuple(self)
 
     @cached_property
     def max_x(self) -> WindowX:
@@ -41,6 +42,9 @@ class Resolution:
     @cached_property
     def max_xy(self) -> WindowXY:
         return WindowXY(self.max_x, self.max_y)
+
+    def __iter__(self) -> Iterator[DisplayWidth | DisplayHeight]:
+        return iter(self.tuple)
 
 
 @dataclass(frozen=True)
