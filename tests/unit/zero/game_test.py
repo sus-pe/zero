@@ -20,7 +20,9 @@ async def test_mouse_cursor(
     assert game.is_os_cursor_hidden()
     for stub in stub_mouse_events:
         game.send_mouse_motion(stub)
-        await game.wait_for_next_mouse_motion()
+        recieved = await game.wait_for_next_mouse_motion()
+        assert isinstance(recieved, MouseCursorEvent)
+        assert recieved == stub
         await game.wait_next_loop()
         cursor = game.get_mouse_cursor_xy()
         assert cursor == stub.xy
@@ -37,4 +39,23 @@ async def test_mouse_cursor_out_of_boundary(
         event = stub.as_pygame_event()
         event.dict["pos"] = tuple(-1 * c for c in event.dict["pos"])
         game.send(event)
+        recieved = await game.wait_for_next_mouse_motion()
+        assert isinstance(recieved, MouseCursorEvent)
+        assert recieved.xy == game.display.origin
         await game.wait_next_loop()
+        assert game.get_mouse_cursor_xy() == game.display.origin
+
+        event = stub.as_pygame_event()
+        event.dict["pos"] = tuple(
+            c + s
+            for c, s in zip(event.dict["pos"], game.display.resolution, strict=True)
+        )
+        assert event.dict["pos"][0] > game.display.resolution.max_x
+        assert event.dict["pos"][1] > game.display.resolution.max_y
+
+        game.send(event)
+        recieved = await game.wait_for_next_mouse_motion()
+        assert isinstance(recieved, MouseCursorEvent)
+        assert recieved.xy == game.display.max_xy
+        await game.wait_next_loop()
+        assert game.get_mouse_cursor_xy() == game.display.max_xy
