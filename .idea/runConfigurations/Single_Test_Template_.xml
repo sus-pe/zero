@@ -1,0 +1,25 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Single Test Template!" type="tests" factoryName="Autodetect">
+    <module name="zero" />
+    <option name="ENV_FILES" value="" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="PARENT_ENVS" value="true" />
+    <option name="SDK_HOME" value="" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="IS_MODULE_SDK" value="true" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="true" />
+    <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+    <option name="_new_additionalArguments" value="&quot;-n0&quot;" />
+    <option name="_new_target" value="&quot;tests.unit.zero.ipc_test.test_ipc&quot;" />
+    <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="ruff format" run_configuration_type="UvRunConfigurationType" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="ruff linter" run_configuration_type="UvRunConfigurationType" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="mypy" run_configuration_type="UvRunConfigurationType" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="type check" run_configuration_type="UvRunConfigurationType" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="vulture" run_configuration_type="UvRunConfigurationType" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="uv build" run_configuration_type="ShConfigurationType" />
+    </method>
+  </configuration>
+</component>

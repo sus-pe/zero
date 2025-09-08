@@ -17,6 +17,7 @@ def _assert_no_outputs(capfd: CaptureFixture[str]) -> Fixture[None]:
 
 
 async def assert_subprocess(command: str, flags: list[str]) -> None:
+    # TODO: DUP(1)
     proc = await create_subprocess_exec(
         command,
         *flags,
