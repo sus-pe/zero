@@ -129,7 +129,7 @@ class Game:
     async def publish_to[T](
         self, subscribers: EventSubscribers[T], event: Event[T]
     ) -> None:
-        requeue_subs: list[EventQueue] = []
+        requeue_subs: list[EventQueue[T]] = []
         while not subscribers.empty():
             sub = subscribers.get_nowait()
             if isinstance(sub, Future):
