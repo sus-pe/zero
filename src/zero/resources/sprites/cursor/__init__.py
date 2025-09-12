@@ -112,3 +112,15 @@ class PressedMouseCursorSprite(Sprite):
     @classmethod
     def from_surface(cls, surface: Surface) -> "PressedMouseCursorSprite":
         return cast(PressedMouseCursorSprite, super().from_surface(surface))
+
+
+@dataclass(frozen=True)
+class ButtonSprite(Sprite):
+    @classmethod
+    def load(cls) -> "ButtonSprite":
+        asset = files(__package__).joinpath("button.png")
+        return cls.from_surface(cls._load_surface(asset))
+
+    @classmethod
+    def from_surface(cls, surface: Surface) -> "ButtonSprite":
+        return cast(ButtonSprite, super().from_surface(surface))

@@ -13,6 +13,7 @@ from zero.display import Display
 from zero.mouse import Mouse, MouseCursorEvent
 from zero.resources.loader import ResourceLoader
 from zero.resources.sprites.cursor import (
+    ButtonSprite,
     MouseCursorSprite,
     PressedMouseCursorSprite,
     Sprite,
@@ -227,3 +228,7 @@ class Game:
 
     def send(self, event: PygameEvent) -> None:
         pygame.event.post(event)
+
+    @cached_property
+    def button_sprite(self) -> ButtonSprite:
+        return self._resource_loader.convert_button_sprite
