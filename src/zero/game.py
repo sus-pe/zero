@@ -208,7 +208,7 @@ class Game:
         else:
             sprite = self.mouse_cursor_sprite
 
-        sprite.blit_to(self.display.surface, self._mouse.cursor_xy)
+        self.render(sprite, self._mouse.cursor_xy)
 
     def is_displayed(self, sprite: Sprite, xy: WindowXY) -> bool:
         display_rect = self.display.surface.subsurface(sprite.rect_at(xy))

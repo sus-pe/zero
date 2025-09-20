@@ -203,4 +203,4 @@ class Display:
         return NonNegInt(res)
 
     def render(self, sprite: Sprite, at: WindowXY) -> None:
-        self.surface.blit(sprite.surface, at.tuple)
+        self.surface.blit(sprite.surface, at)

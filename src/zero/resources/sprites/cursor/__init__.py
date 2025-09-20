@@ -72,9 +72,6 @@ class Sprite:
     def convert(self) -> "Sprite":
         return self.from_surface(self._surface.convert_alpha())
 
-    def blit_to(self, target: Surface, xy: WindowXY) -> None:
-        target.blit(self._surface, xy)
-
     @classmethod
     def _load_surface(cls, asset: Traversable) -> Surface:
         assert asset.is_file(), f"Provided {asset=} could not be found!"
