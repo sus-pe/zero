@@ -1,6 +1,11 @@
 fail_fast: true
 repos:
   - hooks:
+      - id: commitizen
+      - id: commitizen-branch
+    repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.8.3
+  - hooks:
       - id: trailing-whitespace
         stages: [pre-commit]
       - id: no-commit-to-branch
@@ -62,13 +67,6 @@ repos:
         args: [--fix, --exit-non-zero-on-fix]
         types_or: [python, pyi]
         require_serial: true
-  - hooks:
-      - id: commitizen
-      - id: commitizen-branch
-        stages:
-          - pre-push
-    repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.8.3
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
     hooks:
