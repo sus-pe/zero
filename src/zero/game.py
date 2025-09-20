@@ -98,7 +98,7 @@ class Game:
 
     async def _do_one_loop(self) -> bool:
         is_quit: bool = False
-        self.display.surface.fill((0, 0, 0))
+        self.display.clear()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 is_quit = True

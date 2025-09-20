@@ -204,3 +204,9 @@ class Display:
 
     def render(self, sprite: Sprite, at: WindowXY) -> None:
         self.surface.blit(sprite.surface, at)
+
+    def clear(self) -> None:
+        """
+        Will fill the surface with black color.
+        """
+        self.surface.fill((0, 0, 0))
