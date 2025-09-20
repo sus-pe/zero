@@ -211,6 +211,7 @@ class Game:
         self.render(sprite, self._mouse.cursor_xy)
 
     def is_displayed(self, sprite: Sprite, xy: WindowXY) -> bool:
+        # TODO: ensure Game class has no reference to the concept of a pygame Surface.
         display_rect = self.display.surface.subsurface(sprite.rect_at(xy))
         return sprite.is_displayed_by(display_rect)
 
