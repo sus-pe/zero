@@ -159,8 +159,8 @@ class Game:
     ) -> None:
         await self._next_mouse_motion_subscribers.put(f)
 
-    def send_mouse_motion(self, expected_mouse: MouseCursorEvent) -> None:
-        pygame.event.post(expected_mouse.as_pygame_event())
+    def send_mouse_motion(self, mouse: MouseCursorEvent) -> None:
+        pygame.event.post(mouse.as_pygame_event())
 
     def get_mouse_cursor_xy(self) -> WindowXY:
         assert self._mouse, "Supposed to be initialized"
