@@ -9,6 +9,7 @@ import pygame
 from pygame import Surface
 
 from zero.contextmanagers import suppress_no_fast_renderer_warning
+from zero.resources.sprites.cursor import Sprite
 from zero.sdl import SDL_VIDEODRIVER_ENV_KEY
 from zero.type_wrappers.arithmetic import NonNegInt, Pixels
 from zero.type_wrappers.window import WindowX, WindowXY, WindowY
@@ -200,3 +201,6 @@ class Display:
     def _clamp_coordinate(self, c: int, max_c: NonNegInt) -> NonNegInt:
         res = 0 if c < 0 else min(c, max_c)
         return NonNegInt(res)
+
+    def render(self, sprite: Sprite, at: WindowXY) -> None:
+        self.surface.blit(sprite.surface, at.tuple)

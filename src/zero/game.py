@@ -232,3 +232,6 @@ class Game:
     @cached_property
     def button_sprite(self) -> ButtonSprite:
         return self._resource_loader.convert_button_sprite
+
+    def render(self, sprite: Sprite, at: WindowXY) -> None:
+        self.display.render(sprite, at)
