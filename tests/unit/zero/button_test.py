@@ -1,9 +1,14 @@
+from collections.abc import Iterator
+
 from zero.game import Game
-from zero.type_wrappers.window import WindowXY
+from zero.mouse import MouseCursorEvent
 
 
-def test_button(game: Game) -> None:
-    assert game.button_sprite
-    button_xy = WindowXY.from_xy(10, 10)
-    game.render(game.button_sprite, at=button_xy)
-    assert game.is_displayed(game.button_sprite, xy=button_xy)
+async def test_button(
+    game: Game, stub_mouse_events: Iterator[MouseCursorEvent]
+) -> None:
+    for mouse in stub_mouse_events:
+        game.add_button(at=mouse.xy)
+
+        game.send_mouse_motion(mouse)
+        await game.wait_for_next_mouse_motion()

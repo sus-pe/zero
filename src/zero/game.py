@@ -236,3 +236,11 @@ class Game:
 
     def render(self, sprite: Sprite, at: WindowXY) -> None:
         self.display.render(sprite, at)
+
+    def add_button(self, at: WindowXY) -> None:
+        assert self.button_sprite
+        self.render(self.button_sprite, at=at)
+        self.assert_displayed(self.button_sprite, at=at)
+
+    def assert_displayed(self, sprite: Sprite, at: WindowXY) -> None:
+        assert self.is_displayed(sprite, xy=at)
