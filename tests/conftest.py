@@ -84,24 +84,6 @@ def project_root() -> Path:
     return Path(__file__).parent.parent.resolve()
 
 
-@fixture(scope="session")
-def dist_root(project_root: Path) -> Path:
-    res = project_root / "dist"
-    assert res.is_dir()
-    return res
-
-
-@fixture(scope="session")
-def zero_executable(dist_root: Path) -> Path:
-    matches = list(dist_root.glob("zero-*.whl"))
-    assert matches, f"No zero-*.whl found in {dist_root}!"
-    assert len(matches) == 1, "Supposed to be a single zero-*.whl!"
-    wheel = matches[0]
-    res = dist_root / wheel
-    assert res.is_file()
-    return res
-
-
 @fixture
 def stub_mouse_events() -> Iterable[MouseCursorEvent]:
     return (

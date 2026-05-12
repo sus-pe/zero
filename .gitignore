@@ -21,3 +21,4 @@ tests/unit/__pycache__/
 .xml
 
 tests/unit/zero/type_wrappers/__pycache__/
+tests/unit/zero/resources/__pycache__/resources_test.cpython-313-pytest-8.4.1.pyc.3216
