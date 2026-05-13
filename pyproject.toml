@@ -5,7 +5,10 @@ description = ""
 authors = [{ name = "suspe", email = "davidp.info1@gmail.com" }]
 requires-python = ">=3.12,<4.0"
 readme = "README.md"
-dependencies = ["pygame-ce>=2.5.5", "typer-slim>=0.16.1"]
+dependencies = [
+    "pygame-ce>=2.5.5",
+    "typer-slim>=0.16.1",
+]
 
 [dependency-groups]
 git = ["pre-commit>=4.2.0,<5", "commitizen>=4.8.3,<5"]
@@ -23,7 +26,9 @@ test = [
     "pytest-randomly>=3.16.0",
     "pytest-flakefinder>=1.1.0",
     "pytest-xdist[psutil]>=3.8.0",
+    "uv>=0.11.14",
 ]
+dev = []
 
 [tool.uv]
 default-groups = ["git", "code-style", "test"]
